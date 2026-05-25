@@ -1,5 +1,6 @@
 const canvas = document.getElementById('myCanvas');
 const ctx = canvas.getContext('2d');
+const textInput     = document.getElementById('text');
 const strokeWidthSlider = document.getElementById('strokeWidth');
 const w0Slider  = document.getElementById('w0');
 const sSlider   = document.getElementById('s');
@@ -23,12 +24,101 @@ canvas.addEventListener('mousemove', (event) => {
     draw();
 });
 
-[strokeWidthSlider, w0Slider, sSlider, h0Slider, h1Slider, tSlider, h2Slider, scaleSlider, roundedToggle, gridToggle, whiteToggle].forEach(el => {
+[textInput, strokeWidthSlider, w0Slider, sSlider, h0Slider, h1Slider, tSlider, h2Slider, scaleSlider, roundedToggle, gridToggle, whiteToggle].forEach(el => {
     el.addEventListener('input', draw);
 });
 
+function drawS(x, y, i) {
+    ctx.moveTo(x[i],   y[0]);
+    ctx.lineTo(x[i+1], y[0]);
+    ctx.lineTo(x[i+1], y[1]);
+    ctx.lineTo(x[i],   y[1]);
+    ctx.lineTo(x[i],   y[2]);
+    ctx.lineTo(x[i+1], y[2]);
+}
+
+function drawI(x, y, i) {
+    ctx.moveTo(x[i], y[0]);
+    ctx.lineTo(x[i], y[2]);
+    ctx.moveTo(x[i], y[3]);
+    ctx.lineTo(x[i], y[3]);
+}
+
+function drawN(x, y, i) {
+    ctx.moveTo(x[i],   y[0]);
+    ctx.lineTo(x[i],   y[2]);
+    ctx.lineTo(x[i+1], y[2]);
+    ctx.lineTo(x[i+1], y[0]);
+}
+
+function drawC(x, y, i) {
+    ctx.moveTo(x[i+1], y[0]);
+    ctx.lineTo(x[i],   y[0]);
+    ctx.lineTo(x[i],   y[2]);
+    ctx.lineTo(x[i+1], y[2]);
+}
+
+function drawL(x, y, i) {
+    ctx.moveTo(x[i], y[0]);
+    ctx.lineTo(x[i], y[4]);
+}
+
+function drawA(x, y, i) {
+    ctx.moveTo(x[i+1] - 1/8, y[1]); // slight bodge
+    ctx.lineTo(x[i],   y[1]);
+    ctx.lineTo(x[i],   y[0]);
+    ctx.lineTo(x[i+1], y[0]);
+    ctx.lineTo(x[i+1], y[2]);
+    ctx.lineTo(x[i],   y[2]);
+}
+
+function drawR(x, y, i) {
+    ctx.moveTo(x[i],   y[0]);
+    ctx.lineTo(x[i],   y[2]);
+    ctx.lineTo(x[i+1], y[2]);
+}
+
+const drawFns = {
+    A: { fn: drawA, wide: true },
+    C: { fn: drawC, wide: true },
+    I: { fn: drawI, wide: false },
+    L: { fn: drawL, wide: false },
+    N: { fn: drawN, wide: true },
+    R: { fn: drawR, wide: true },
+    S: { fn: drawS, wide: true },
+};
+
+function buildLayout(text, w0, s) {
+    const x = [];
+    const letters = [];
+    let xi = 0;
+    let pos = 0;
+
+    for (const ch of text.toUpperCase()) {
+        const entry = drawFns[ch];
+        if (!entry) continue;
+
+        const i = xi;
+        x[i] = pos;
+
+        if (entry.wide) {
+            x[i + 1] = pos + w0 - 1;
+            xi = i + 2;
+            pos = x[i + 1] + 1 + s;
+        } else {
+            xi = i + 1;
+            pos = x[i] + 1 + s;
+        }
+
+        letters.push({ fn: entry.fn, i });
+    }
+
+    return { x, letters, width: xi > 0 ? x[xi - 1] : 0 };
+}
+
 function draw() {
     // Configure
+    const text    =     textInput.value;
     const sw      =     strokeWidthSlider.value / 10; // stroke width
     const w0      = 8 * w0Slider.value          / 10; // char width
     const s       =     sSlider.value           / 10; // spacing
@@ -42,19 +132,7 @@ function draw() {
     const white   =     whiteToggle.checked;
 
     // Calculate points
-    const x = [0];
-    x[1]  = x[0]  + w0 - 1;
-    x[2]  = x[1]  + 1 + s;
-    x[3]  = x[2]  + 1 + s;
-    x[4]  = x[3]  + w0 - 1;
-    x[5]  = x[4]  + 1 + s;
-    x[6]  = x[5]  + w0 - 1;
-    x[7]  = x[6]  + 1 + s;
-    x[8]  = x[7]  + 1 + s;
-    x[9]  = x[8]  + w0 - 1;
-    x[10] = x[9]  + 1 + s;
-    x[11] = x[10] + 1 + s;
-    x[12] = x[11] + w0 - 1;
+    const { x, letters, width } = buildLayout(text, w0, s);
     const y = [0];
     y[1] = y[0] + h0;
     y[2] = y[1] + h1;
@@ -68,7 +146,7 @@ function draw() {
     ctx.save();
 
     // Set overall transform
-    ctx.translate((canvas.width - x[12] * scale) / 2, (canvas.height + y[4] * scale) / 2);
+    ctx.translate((canvas.width - width * scale) / 2, (canvas.height + y[4] * scale) / 2);
     ctx.scale(scale, -scale);
 
     if (grid) {
@@ -95,54 +173,7 @@ function draw() {
     ctx.strokeStyle = white ? 'white' : 'black';
     ctx.beginPath();
 
-    // S
-    ctx.moveTo(x[0], y[0]);
-    ctx.lineTo(x[1], y[0]);
-    ctx.lineTo(x[1], y[1]);
-    ctx.lineTo(x[0], y[1]);
-    ctx.lineTo(x[0], y[2]);
-    ctx.lineTo(x[1], y[2]);
-
-    // I
-    ctx.moveTo(x[2], y[0]);
-    ctx.lineTo(x[2], y[2]);
-    ctx.moveTo(x[2], y[3]);
-    ctx.lineTo(x[2], y[3]);
-
-    // N
-    ctx.moveTo(x[3], y[0]);
-    ctx.lineTo(x[3], y[2]);
-    ctx.lineTo(x[4], y[2]);
-    ctx.lineTo(x[4], y[0]);
-
-    // C
-    ctx.moveTo(x[6], y[0]);
-    ctx.lineTo(x[5], y[0]);
-    ctx.lineTo(x[5], y[2]);
-    ctx.lineTo(x[6], y[2]);
-
-    // L
-    ctx.moveTo(x[7], y[0]);
-    ctx.lineTo(x[7], y[4]);
-
-    // A (slight bodge)
-    ctx.moveTo(x[9] - 1/8, y[1]);
-    ctx.lineTo(x[8], y[1]);
-    ctx.lineTo(x[8], y[0]);
-    ctx.lineTo(x[9], y[0]);
-    ctx.lineTo(x[9], y[2]);
-    ctx.lineTo(x[8], y[2]);
-
-    // I
-    ctx.moveTo(x[10], y[0]);
-    ctx.lineTo(x[10], y[2]);
-    ctx.moveTo(x[10], y[3]);
-    ctx.lineTo(x[10], y[3]);
-
-    // R
-    ctx.moveTo(x[11], y[0]);
-    ctx.lineTo(x[11], y[2]);
-    ctx.lineTo(x[12], y[2]);
+    letters.forEach(({ fn, i }) => fn(x, y, i));
 
     ctx.stroke();
 
