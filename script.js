@@ -31,16 +31,15 @@ function draw() {
     // Configure
     const sw      = strokeWidthSlider.value / 10; // stroke width
     const w0      = 8 * w0Slider.value / 10;      // char width
-    const s       = sSlider.value  / 10;           // spacing
-    const h0      = 2 * h0Slider.value / 10;       // lower height
-    const h1      = 2 * h1Slider.value / 10;       // upper height
-    const t       = tSlider.value  / 10;           // upper spacing
-    const h2      = h2Slider.value / 10;           // ascender height
-    const scale   = scaleSlider.value;             // overall scale
+    const s       = sSlider.value  / 10;          // spacing
+    const h0      = 2 * h0Slider.value / 10;      // lower height
+    const h1      = 2 * h1Slider.value / 10;      // upper height
+    const t       = tSlider.value  / 10;          // upper spacing
+    const h2      = h2Slider.value / 10;          // ascender height
+    const scale            = scaleSlider.value;           // overall scale
     const rounded = roundedToggle.checked;
     const grid    = gridToggle.checked;
     const white   = whiteToggle.checked;
-
     // Calculate points
     const x0  = 0;
     const x1  = x0  + w0 - 1;

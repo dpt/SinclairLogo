@@ -3,57 +3,127 @@
 <head>
     <title>Sinclair-O-Matic</title>
     <style>
-        canvas { border: 1px solid #ccc; }
-        .control label { display: block; }
+        *, *::before, *::after { box-sizing: border-box; }
+
+        body {
+            font-family: system-ui, sans-serif;
+            margin: 0;
+            padding: 1.5rem;
+            background: #e8e8e8;
+            color: #222;
+        }
+
+        h1 {
+            margin: 0 0 1rem;
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+
+        .layout {
+            display: flex;
+            gap: 1rem;
+            align-items: flex-start;
+        }
+
+        canvas {
+            display: block;
+            border: 1px solid #bbb;
+        }
+
+        .controls {
+            background: white;
+            border: 1px solid #d0d0d0;
+            border-radius: 8px;
+            padding: 0.875rem 1.125rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            min-width: 240px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+        }
+
+        .controls hr {
+            border: none;
+            border-top: 1px solid #ebebeb;
+            margin: 0.125rem 0;
+        }
+
+        .control {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .control label {
+            flex: 1;
+            font-size: 0.8125rem;
+            color: #555;
+            white-space: nowrap;
+        }
+
+        .control input[type="range"] {
+            width: 110px;
+            accent-color: #333;
+        }
+
+        .control input[type="checkbox"] {
+            width: 1rem;
+            height: 1rem;
+            accent-color: #333;
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>
 <h1>Sinclair-O-Matic</h1>
-<canvas id="myCanvas" width="800" height="600"></canvas>
-<div class="controls">
-    <div class="control">
-        <label for="strokeWidth">Stroke width:</label>
-        <input type="range" id="strokeWidth" name="strokeWidth" min="1" max="20" value="14">
-    </div>
-    <div class="control">
-        <label for="w0">Wide character width:</label>
-        <input type="range" id="w0" name="w0" min="1" max="40" value="10">
-    </div>
-    <div class="control">
-        <label for="s">Spacing:</label>
-        <input type="range" id="s" name="s" min="1" max="40" value="10">
-    </div>
-    <div class="control">
-        <label for="h0">Bottom height:</label>
-        <input type="range" id="h0" name="h0" min="1" max="40" value="10">
-    </div>
-    <div class="control">
-        <label for="h1">Upper height:</label>
-        <input type="range" id="h1" name="h1" min="1" max="40" value="10">
-    </div>
-    <div class="control">
-        <label for="t">Upper spacing:</label>
-        <input type="range" id="t" name="t" min="1" max="40" value="20">
-    </div>
-    <div class="control">
-        <label for="h2">Ascender height:</label>
-        <input type="range" id="h2" name="h2" min="0" max="39" value="0">
-    </div>
-    <div class="control">
-        <label for="scale">Scale:</label>
-        <input type="range" id="scale" name="scale" min="1" max="40" value="12">
-    </div>
-    <div class="control">
-        <label for="rounded">Rounded:</label>
-        <input type="checkbox" id="rounded" name="rounded">
-</div>
-    <div class="control">
-        <label for="grid">Grid:</label>
-        <input type="checkbox" id="grid" name="grid">
-    </div>
-    <div class="control">
-        <label for="white">White:</label>
-        <input type="checkbox" id="white" name="white">
+<div class="layout">
+    <canvas id="myCanvas" width="800" height="600"></canvas>
+    <div class="controls">
+        <div class="control">
+            <label for="strokeWidth">Stroke width:</label>
+            <input type="range" id="strokeWidth" name="strokeWidth" min="1" max="20" value="14">
+        </div>
+        <div class="control">
+            <label for="w0">Wide character width:</label>
+            <input type="range" id="w0" name="w0" min="1" max="40" value="10">
+        </div>
+        <div class="control">
+            <label for="s">Spacing:</label>
+            <input type="range" id="s" name="s" min="1" max="40" value="10">
+        </div>
+        <div class="control">
+            <label for="h0">Bottom height:</label>
+            <input type="range" id="h0" name="h0" min="1" max="40" value="10">
+        </div>
+        <div class="control">
+            <label for="h1">Upper height:</label>
+            <input type="range" id="h1" name="h1" min="1" max="40" value="10">
+        </div>
+        <div class="control">
+            <label for="t">Upper spacing:</label>
+            <input type="range" id="t" name="t" min="1" max="40" value="20">
+        </div>
+        <div class="control">
+            <label for="h2">Ascender height:</label>
+            <input type="range" id="h2" name="h2" min="0" max="39" value="0">
+        </div>
+        <div class="control">
+            <label for="scale">Scale:</label>
+            <input type="range" id="scale" name="scale" min="1" max="40" value="12">
+        </div>
+        <hr>
+        <div class="control">
+            <label for="rounded">Rounded:</label>
+            <input type="checkbox" id="rounded" name="rounded">
+        </div>
+        <div class="control">
+            <label for="grid">Grid:</label>
+            <input type="checkbox" id="grid" name="grid">
+        </div>
+        <div class="control">
+            <label for="white">White:</label>
+            <input type="checkbox" id="white" name="white">
+        </div>
     </div>
 </div>
 
