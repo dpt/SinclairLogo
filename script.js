@@ -112,16 +112,16 @@ function drawB(x, y, i, sw) {
     ctx.lineTo(x[i],   y[0]);
     ctx.lineTo(x[i+1], y[0]);
     ctx.lineTo(x[i+1], y[2]);
-    ctx.lineTo(x[i],   y[2]);
+    ctx.lineTo(x[i] + sw / 2, y[2]);
 }
 
 // B flipped
 function drawD(x, y, i, sw) {
     ctx.moveTo(x[i+1], y[4]);
     ctx.lineTo(x[i+1], y[0]);
-    ctx.lineTo(x[i+0], y[0]);
-    ctx.lineTo(x[i+0], y[2]);
-    ctx.lineTo(x[i+1], y[2]);
+    ctx.lineTo(x[i],   y[0]);
+    ctx.lineTo(x[i],   y[2]);
+    ctx.lineTo(x[i+1] - sw / 2, y[2]);
 }
 
 function drawF(x, y, i, sw) {
@@ -135,11 +135,11 @@ function drawF(x, y, i, sw) {
 // E flipped. Could it descend?
 function drawG(x, y, i, sw) {
     ctx.moveTo(x[i+1] - sw / 2, y[1]);
-    ctx.lineTo(x[i+0], y[1]);
-    ctx.lineTo(x[i+0], y[2]);
+    ctx.lineTo(x[i],   y[1]);
+    ctx.lineTo(x[i],   y[2]);
     ctx.lineTo(x[i+1], y[2]);
     ctx.lineTo(x[i+1], y[0]);
-    ctx.lineTo(x[i+0], y[0]);
+    ctx.lineTo(x[i],   y[0]);
 }
 
 function drawH(x, y, i, sw) {
@@ -172,7 +172,7 @@ function drawP(x, y, i, sw) {
     ctx.lineTo(x[i],   y[2]);
     ctx.lineTo(x[i+1], y[2]);
     ctx.lineTo(x[i+1], y[1]);
-    ctx.lineTo(x[i],   y[1]);
+    ctx.lineTo(x[i] + sw / 2, y[1]);
 }
 
 // Again needs to descend.
@@ -181,15 +181,15 @@ function drawQ(x, y, i, sw) {
     ctx.lineTo(x[i+1], y[2]);
     ctx.lineTo(x[i],   y[2]);
     ctx.lineTo(x[i],   y[1]);
-    ctx.lineTo(x[i+1], y[1]);
+    ctx.lineTo(x[i+1] - sw / 2, y[1]);
 }
 
 function drawT(x, y, i, sw) {
-    ctx.moveTo(x[i],   y[2]);
+    ctx.moveTo(x[i],   y[4]);
     ctx.lineTo(x[i],   y[0]);
     ctx.lineTo(x[i+1], y[0]);
-    ctx.moveTo(x[i],   y[1]);
-    ctx.lineTo(x[i+1], y[1]);
+    ctx.moveTo(x[i] + sw / 2, y[2]);
+    ctx.lineTo(x[i+1], y[2]);
 }
 
 function drawU(x, y, i, sw) {
@@ -202,7 +202,7 @@ function drawU(x, y, i, sw) {
 function drawY(x, y, i, sw) {
     ctx.moveTo(x[i],   y[2]);
     ctx.lineTo(x[i],   y[1]);
-    ctx.lineTo(x[i+1], y[1]);
+    ctx.lineTo(x[i+1] - sw / 2, y[1]);
     ctx.moveTo(x[i],   y[0]);
     ctx.lineTo(x[i+1], y[0]);
     ctx.lineTo(x[i+1], y[2]);
@@ -219,7 +219,7 @@ function drawUnknown(x, y, i, sw) {
 }
 
 const drawFns = {
-    ' ': { fn: drawSpace, wide: true },
+    ' ': { fn: drawSpace, wide: false },
     A: { fn: drawA, wide: true },
     B: { fn: drawB, wide: true },
     C: { fn: drawC, wide: true },
