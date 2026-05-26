@@ -42,7 +42,10 @@ resetButton.addEventListener('click', () => {
     draw();
 });
 
-function drawS(x, y, i) {
+// Official glyphs first
+//
+
+function drawS(x, y, i, sw) {
     ctx.moveTo(x[i],   y[0]);
     ctx.lineTo(x[i+1], y[0]);
     ctx.lineTo(x[i+1], y[1]);
@@ -51,34 +54,34 @@ function drawS(x, y, i) {
     ctx.lineTo(x[i+1], y[2]);
 }
 
-function drawI(x, y, i) {
+function drawI(x, y, i, sw) {
     ctx.moveTo(x[i], y[0]);
     ctx.lineTo(x[i], y[2]);
     ctx.moveTo(x[i], y[3]);
     ctx.lineTo(x[i], y[3]);
 }
 
-function drawN(x, y, i) {
+function drawN(x, y, i, sw) {
     ctx.moveTo(x[i],   y[0]);
     ctx.lineTo(x[i],   y[2]);
     ctx.lineTo(x[i+1], y[2]);
     ctx.lineTo(x[i+1], y[0]);
 }
 
-function drawC(x, y, i) {
+function drawC(x, y, i, sw) {
     ctx.moveTo(x[i+1], y[0]);
     ctx.lineTo(x[i],   y[0]);
     ctx.lineTo(x[i],   y[2]);
     ctx.lineTo(x[i+1], y[2]);
 }
 
-function drawL(x, y, i) {
+function drawL(x, y, i, sw) {
     ctx.moveTo(x[i], y[0]);
     ctx.lineTo(x[i], y[4]);
 }
 
-function drawA(x, y, i) {
-    ctx.moveTo(x[i+1] - 1/8, y[1]); // slight bodge
+function drawA(x, y, i, sw) {
+    ctx.moveTo(x[i+1] - sw / 2, y[1]);
     ctx.lineTo(x[i],   y[1]);
     ctx.lineTo(x[i],   y[0]);
     ctx.lineTo(x[i+1], y[0]);
@@ -86,20 +89,157 @@ function drawA(x, y, i) {
     ctx.lineTo(x[i],   y[2]);
 }
 
-function drawR(x, y, i) {
+function drawR(x, y, i, sw) {
     ctx.moveTo(x[i],   y[0]);
     ctx.lineTo(x[i],   y[2]);
     ctx.lineTo(x[i+1], y[2]);
 }
 
+// Infidel glyphs hence
+//
+
+function drawE(x, y, i, sw) {
+    ctx.moveTo(x[i] + sw / 2, y[1]);
+    ctx.lineTo(x[i+1], y[1]);
+    ctx.lineTo(x[i+1], y[2]);
+    ctx.lineTo(x[i],   y[2]);
+    ctx.lineTo(x[i],   y[0]);
+    ctx.lineTo(x[i+1], y[0]);
+}
+
+function drawB(x, y, i, sw) {
+    ctx.moveTo(x[i],   y[4]);
+    ctx.lineTo(x[i],   y[0]);
+    ctx.lineTo(x[i+1], y[0]);
+    ctx.lineTo(x[i+1], y[2]);
+    ctx.lineTo(x[i],   y[2]);
+}
+
+// B flipped
+function drawD(x, y, i, sw) {
+    ctx.moveTo(x[i+1], y[4]);
+    ctx.lineTo(x[i+1], y[0]);
+    ctx.lineTo(x[i+0], y[0]);
+    ctx.lineTo(x[i+0], y[2]);
+    ctx.lineTo(x[i+1], y[2]);
+}
+
+function drawF(x, y, i, sw) {
+    ctx.moveTo(x[i],   y[0]);
+    ctx.lineTo(x[i],   y[2]);
+    ctx.lineTo(x[i+1], y[2]);
+    ctx.moveTo(x[i],   y[1]);
+    ctx.lineTo(x[i+1], y[1]);
+}
+
+// E flipped. Could it descend?
+function drawG(x, y, i, sw) {
+    ctx.moveTo(x[i+1] - sw / 2, y[1]);
+    ctx.lineTo(x[i+0], y[1]);
+    ctx.lineTo(x[i+0], y[2]);
+    ctx.lineTo(x[i+1], y[2]);
+    ctx.lineTo(x[i+1], y[0]);
+    ctx.lineTo(x[i+0], y[0]);
+}
+
+function drawH(x, y, i, sw) {
+    ctx.moveTo(x[i],   y[4]);
+    ctx.lineTo(x[i],   y[0]);
+    ctx.moveTo(x[i] + sw / 2, y[2]);
+    ctx.lineTo(x[i+1], y[2]);
+    ctx.lineTo(x[i+1], y[0]);
+}
+
+// Again needs to descend.
+function drawJ(x, y, i, sw) {
+    ctx.moveTo(x[i], y[0] - 1); // hack
+    ctx.lineTo(x[i], y[2]);
+    ctx.moveTo(x[i], y[3]);
+    ctx.lineTo(x[i], y[3]);
+}
+
+function drawO(x, y, i, sw) {
+    ctx.moveTo(x[i],   y[0]);
+    ctx.lineTo(x[i],   y[2]);
+    ctx.lineTo(x[i+1], y[2]);
+    ctx.lineTo(x[i+1], y[0]);
+    ctx.closePath();
+}
+
+// Again needs to descend.
+function drawP(x, y, i, sw) {
+    ctx.moveTo(x[i],   y[0]);
+    ctx.lineTo(x[i],   y[2]);
+    ctx.lineTo(x[i+1], y[2]);
+    ctx.lineTo(x[i+1], y[1]);
+    ctx.lineTo(x[i],   y[1]);
+}
+
+// Again needs to descend.
+function drawQ(x, y, i, sw) {
+    ctx.moveTo(x[i+1], y[0]);
+    ctx.lineTo(x[i+1], y[2]);
+    ctx.lineTo(x[i],   y[2]);
+    ctx.lineTo(x[i],   y[1]);
+    ctx.lineTo(x[i+1], y[1]);
+}
+
+function drawT(x, y, i, sw) {
+    ctx.moveTo(x[i],   y[2]);
+    ctx.lineTo(x[i],   y[0]);
+    ctx.lineTo(x[i+1], y[0]);
+    ctx.moveTo(x[i],   y[1]);
+    ctx.lineTo(x[i+1], y[1]);
+}
+
+function drawU(x, y, i, sw) {
+    ctx.moveTo(x[i],   y[2]);
+    ctx.lineTo(x[i],   y[0]);
+    ctx.lineTo(x[i+1], y[0]);
+    ctx.lineTo(x[i+1], y[2]);
+}
+
+function drawY(x, y, i, sw) {
+    ctx.moveTo(x[i],   y[2]);
+    ctx.lineTo(x[i],   y[1]);
+    ctx.lineTo(x[i+1], y[1]);
+    ctx.moveTo(x[i],   y[0]);
+    ctx.lineTo(x[i+1], y[0]);
+    ctx.lineTo(x[i+1], y[2]);
+}
+
+function drawSpace(x, y, i, sw) {}
+
+function drawUnknown(x, y, i, sw) {
+    drawO(x, y, i);
+    ctx.moveTo(x[i] + sw / 2,   y[0] + sw / 2);
+    ctx.lineTo(x[i+1] - sw / 2, y[2] - sw / 2);
+    ctx.moveTo(x[i+1] - sw / 2, y[0] + sw / 2);
+    ctx.lineTo(x[i] + sw / 2,   y[2] - sw / 2);
+}
+
 const drawFns = {
+    ' ': { fn: drawSpace, wide: true },
     A: { fn: drawA, wide: true },
+    B: { fn: drawB, wide: true },
     C: { fn: drawC, wide: true },
+    D: { fn: drawD, wide: true },
+    E: { fn: drawE, wide: true },
+    F: { fn: drawF, wide: true },
+    G: { fn: drawG, wide: true },
+    H: { fn: drawH, wide: true },
     I: { fn: drawI, wide: false },
+    J: { fn: drawJ, wide: false },
     L: { fn: drawL, wide: false },
     N: { fn: drawN, wide: true },
+    O: { fn: drawO, wide: true },
+    P: { fn: drawP, wide: true },
+    Q: { fn: drawQ, wide: true },
     R: { fn: drawR, wide: true },
     S: { fn: drawS, wide: true },
+    T: { fn: drawT, wide: true },
+    U: { fn: drawU, wide: true },
+    Y: { fn: drawY, wide: true },
 };
 
 function buildLayout(text, w0, s) {
@@ -109,8 +249,7 @@ function buildLayout(text, w0, s) {
     let pos = 0;
 
     for (const ch of text.toUpperCase()) {
-        const entry = drawFns[ch];
-        if (!entry) continue;
+        const entry = drawFns[ch] ?? { fn: drawUnknown, wide: true };
 
         const i = xi;
         x[i] = pos;
@@ -187,7 +326,7 @@ function draw() {
     ctx.strokeStyle = white ? 'white' : 'black';
     ctx.beginPath();
 
-    letters.forEach(({ fn, i }) => fn(x, y, i));
+    letters.forEach(({ fn, i }) => fn(x, y, i, sw));
 
     ctx.stroke();
 
