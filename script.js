@@ -128,7 +128,7 @@ function drawF(x, y, i, sw) {
     ctx.moveTo(x[i],   y[0]);
     ctx.lineTo(x[i],   y[2]);
     ctx.lineTo(x[i+1], y[2]);
-    ctx.moveTo(x[i],   y[1]);
+    ctx.moveTo(x[i] + sw / 2, y[1]);
     ctx.lineTo(x[i+1], y[1]);
 }
 
@@ -199,6 +199,17 @@ function drawU(x, y, i, sw) {
     ctx.lineTo(x[i+1], y[2]);
 }
 
+function drawX(x, y, i, sw) {
+    ctx.moveTo(x[i], y[0]);
+    ctx.lineTo(x[i] + sw/2, y[0]);
+    ctx.lineTo(x[i+1] - sw/2, y[2]);
+    ctx.lineTo(x[i+1], y[2]);
+    ctx.moveTo(x[i+1], [0]);
+    ctx.lineTo(x[i+1] - sw/2, y[0]);
+    ctx.lineTo(x[i] + sw/2, y[2]);
+    ctx.lineTo(x[i], y[2]);
+}
+
 function drawY(x, y, i, sw) {
     ctx.moveTo(x[i],   y[2]);
     ctx.lineTo(x[i],   y[1]);
@@ -239,6 +250,7 @@ const drawFns = {
     S: { fn: drawS, wide: true },
     T: { fn: drawT, wide: true },
     U: { fn: drawU, wide: true },
+    X: { fn: drawX, wide: true },
     Y: { fn: drawY, wide: true },
 };
 
