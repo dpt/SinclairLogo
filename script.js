@@ -12,6 +12,7 @@ const scaleSlider = document.getElementById('scale');
 const roundedToggle = document.getElementById('rounded');
 const gridToggle = document.getElementById('grid');
 const whiteToggle = document.getElementById('white');
+const resetButton = document.getElementById('reset');
 
 let tx = 0;
 let ty = 0;
@@ -24,8 +25,21 @@ canvas.addEventListener('mousemove', (event) => {
     draw();
 });
 
-[textInput, strokeWidthSlider, w0Slider, sSlider, h0Slider, h1Slider, tSlider, h2Slider, scaleSlider, roundedToggle, gridToggle, whiteToggle].forEach(el => {
+const allControls = [textInput, strokeWidthSlider, w0Slider, sSlider, h0Slider, h1Slider, tSlider, h2Slider, scaleSlider, roundedToggle, gridToggle, whiteToggle];
+
+allControls.forEach(el => {
     el.addEventListener('input', draw);
+});
+
+resetButton.addEventListener('click', () => {
+    allControls.forEach(el => {
+        if (el.type === 'checkbox') {
+            el.checked = el.defaultChecked;
+        } else {
+            el.value = el.defaultValue;
+        }
+    });
+    draw();
 });
 
 function drawS(x, y, i) {
