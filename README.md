@@ -1,8 +1,8 @@
-# Sinclair Logo Toy
+# A Sinclair Logo Toy
 
-The classic Sinclair computer logo is highly regular — each glyph is defined by intersections of just two vertical and up to six horizontal grid lines. This repo provides an [interactive page](https://dpt.github.io/SinclairLogo/) that parameterises that grid so you can explore and produce variants in real time.
+The classic Sinclair computer logo is formed on a highly regular grid. Each glyph is defined by intersections of just two vertical and three horizontal grid lines. The constraint is analogous to seven-segment LED displays: a fixed set of possible positions forces each letterform to its most essential shape.
 
-The constraint is analogous to seven-segment LED displays: a fixed set of possible positions forces each letterform to its most essential shape.
+This repository provides an [interactive page](https://dpt.github.io/SinclairLogo/) that parameterises that grid so you can explore and produce variants of the logo in real time.
 
 ---
 
@@ -52,21 +52,24 @@ No build step. Open `index.html` directly in a browser.
 
 ## Character support
 
-**Original Sinclair glyphs** — faithful to the real logo:
+**Original glyphs** — from the logo:
 
-`S`  `I`  `N`  `C`  `L`  `A`  `R`
+`A` `C` `I` `L` `N` `R` `S`
 
 **Extended glyphs** — invented to complete the alphabet within the same system:
 
-`B`  `D`  `E`  `F`  `G`  `H`  `J`  `O`  `P`  `Q`  `T`  `U`  `X`  `Y`
+`B` `D` `E` `F` `H` `O` `T` `V` `Z`
 
-Double-wide (occupy two standard character widths): `M`  `W`
+**Descending glyphs** - utilise an additional row of the grid:
+
+`G` `J` `P` `Q` `Y`
 
 **Characters that bend the rules:**
 
-- **K** — the diagonal arm requires intermediate points that don't sit on the strict grid.
-- **V** — limited expressiveness at only two x-positions; the point is approximated using stroke-width offsets.
-- **X** — both diagonals invent intermediate points outside the grid.
+- `K` - to avoid becoming an H we shift the top right stroke leftwards;
+- `M` and `W` - occupy two standard character widths;
+- `V` — to distinguish V from U we introduce a diagonal;
+- `X` — we again resort to diagonals to create an X.
 
 ---
 
