@@ -73,6 +73,15 @@
             cursor: pointer;
         }
 
+        .control select {
+            width: 110px;
+            font: inherit;
+            font-size: 0.8125rem;
+            border: 1px solid #d0d0d0;
+            border-radius: 4px;
+            padding: 2px 4px;
+        }
+
         .control input[type="text"] {
             width: 110px;
             font: inherit;
@@ -116,6 +125,10 @@
             <input type="range" id="w0" name="w0" min="1" max="40" value="10">
         </div>
         <div class="control">
+            <label for="w1">Very wide char width:</label>
+            <input type="range" id="w1" name="w1" min="1" max="60" value="10">
+        </div>
+        <div class="control">
             <label for="s">Spacing:</label>
             <input type="range" id="s" name="s" min="1" max="40" value="10">
         </div>
@@ -136,6 +149,10 @@
             <input type="range" id="h2" name="h2" min="0" max="39" value="0">
         </div>
         <div class="control">
+            <label for="h3">Descender height:</label>
+            <input type="range" id="h3" name="h3" min="0" max="39" value="20">
+        </div>
+        <div class="control">
             <label for="scale">Scale:</label>
             <input type="range" id="scale" name="scale" min="1" max="40" value="12">
         </div>
@@ -149,8 +166,19 @@
             <input type="checkbox" id="grid" name="grid">
         </div>
         <div class="control">
-            <label for="white">White:</label>
-            <input type="checkbox" id="white" name="white">
+            <label for="colours">Colours:</label>
+            <select id="colours" name="colours">
+                <option value="#000000|#FFFFFF">Black on White</option>
+                <option value="#FFFFFF|#000000">White on Black</option>
+                <option value="#0000FF|#FFFF00">Blue on Yellow</option>
+                <option value="#FFFF00|#0000FF">Yellow on Blue</option>
+                <option value="#000000|#00FFFF">Black on Cyan</option>
+                <option value="#00FFFF|#000000">Cyan on Black</option>
+                <option value="#00FF00|#000000">Green on Black</option>
+                <option value="#000000|#00FF00">Black on Green</option>
+                <option value="#FF0000|#FFFFFF">Red on White</option>
+                <option value="#FFFFFF|#FF0000">White on Red</option>
+            </select>
         </div>
         <hr>
         <button id="reset">Reset</button>
