@@ -11,11 +11,11 @@ const tSlider = document.getElementById("t");
 const h2Slider = document.getElementById("h2");
 const h3Slider = document.getElementById("h3");
 const scaleSlider = document.getElementById("scale");
+const roundingSlider = document.getElementById("rounding");
 const roundedToggle = document.getElementById("rounded");
 const gridToggle = document.getElementById("grid");
 const coloursSelect = document.getElementById("colours");
 const resetButton = document.getElementById("reset");
-
 
 const allControls = [
   textInput,
@@ -29,6 +29,7 @@ const allControls = [
   h2Slider,
   h3Slider,
   scaleSlider,
+  roundingSlider,
   roundedToggle,
   gridToggle,
   coloursSelect,
@@ -65,21 +66,99 @@ function resolveCoord(str, x, y, i, sw) {
   return (m[1] === "X" ? x[i + idx] : y[idx]) + off;
 }
 
-function executePath(path, x, y, i, sw) {
+// Returns {m, n} entry/exit points of the rounded arc at corner, or null if degenerate.
+function arcCorner(prev, corner, next, rounding) {
+  const dab = Math.hypot(corner.px - prev.px, corner.py - prev.py);
+  const dbc = Math.hypot(next.px - corner.px, next.py - corner.py);
+  if (dab === 0 || dbc === 0) return null;
+  const d = Math.min(dab, dbc) * rounding;
+  return {
+    m: { px: corner.px - d * (corner.px - prev.px) / dab,
+         py: corner.py - d * (corner.py - prev.py) / dab },
+    n: { px: corner.px + d * (next.px - corner.px) / dbc,
+         py: corner.py + d * (next.py - corner.py) / dbc },
+  };
+}
+
+// Open subpath: round all internal (non-endpoint) corners.
+function drawOpenSubpath(pts, rounding) {
+  const n = pts.length;
+  ctx.moveTo(pts[0].px, pts[0].py);
+  let logX = pts[0].px, logY = pts[0].py;
+  for (let k = 1; k < n; k++) {
+    const corner = pts[k];
+    const next = pts[k + 1];
+    if (next && rounding > 0) {
+      const arc = arcCorner({ px: logX, py: logY }, corner, next, rounding);
+      if (arc) {
+        ctx.lineTo(arc.m.px, arc.m.py);
+        ctx.quadraticCurveTo(corner.px, corner.py, arc.n.px, arc.n.py);
+        logX = corner.px; logY = corner.py;
+        continue;
+      }
+    }
+    ctx.lineTo(corner.px, corner.py);
+    logX = corner.px; logY = corner.py;
+  }
+}
+
+// Closed subpath: round all corners including the wrap-around at the start point.
+// Begins the canvas path after the arc at pts[0] so the seam is invisible.
+function drawClosedSubpath(pts, rounding) {
+  const n = pts.length;
+  if (rounding === 0) {
+    ctx.moveTo(pts[0].px, pts[0].py);
+    for (let k = 1; k < n; k++) ctx.lineTo(pts[k].px, pts[k].py);
+    ctx.closePath();
+    return;
+  }
+  const arcs = pts.map((p, idx) =>
+    arcCorner(pts[(idx - 1 + n) % n], p, pts[(idx + 1) % n], rounding)
+  );
+  const a0 = arcs[0];
+  ctx.moveTo(a0 ? a0.n.px : pts[0].px, a0 ? a0.n.py : pts[0].py);
+  for (let k = 1; k < n; k++) {
+    const arc = arcs[k];
+    if (arc) {
+      ctx.lineTo(arc.m.px, arc.m.py);
+      ctx.quadraticCurveTo(pts[k].px, pts[k].py, arc.n.px, arc.n.py);
+    } else {
+      ctx.lineTo(pts[k].px, pts[k].py);
+    }
+  }
+  if (a0) {
+    ctx.lineTo(a0.m.px, a0.m.py);
+    ctx.quadraticCurveTo(pts[0].px, pts[0].py, a0.n.px, a0.n.py);
+  }
+  ctx.closePath();
+}
+
+function executePath(path, x, y, i, sw, rounding) {
   if (!path) return;
+
   const tokens = path.split(" ");
+  const raw = [];
   let j = 0;
   while (j < tokens.length) {
     const cmd = tokens[j++];
-    if (cmd === "Z") {
-      ctx.closePath();
-      continue;
-    }
+    if (cmd === "Z") { raw.push({ cmd: "Z" }); continue; }
     const [xStr, yStr] = tokens[j++].split(",");
-    const px = resolveCoord(xStr, x, y, i, sw);
-    const py = resolveCoord(yStr, x, y, i, sw);
-    if (cmd === "M") ctx.moveTo(px, py);
-    else ctx.lineTo(px, py);
+    raw.push({ cmd, px: resolveCoord(xStr, x, y, i, sw), py: resolveCoord(yStr, x, y, i, sw) });
+  }
+
+  let k = 0;
+  while (k < raw.length) {
+    if (raw[k].cmd !== "M") { k++; continue; }
+    const { px: sx, py: sy } = raw[k++];
+    const pts = [{ px: sx, py: sy }];
+    let closed = false;
+    while (k < raw.length && raw[k].cmd !== "M") {
+      if (raw[k].cmd === "Z") { closed = true; k++; break; }
+      pts.push({ px: raw[k].px, py: raw[k].py });
+      k++;
+    }
+    if (closed) drawClosedSubpath(pts, rounding);
+    else drawOpenSubpath(pts, rounding);
   }
 }
 
@@ -171,6 +250,7 @@ function draw() {
   const h2 = h2Slider.value / 10; // ascender height
   const h3 = h3Slider.value / 10; // descender height
   const scale = scaleSlider.value; // overall scale
+  const rounding = roundingSlider.value / 100; // corner rounding factor (0–0.5)
   const rounded = roundedToggle.checked;
   const grid = gridToggle.checked;
   const [fg, bg] = coloursSelect.value.split("|");
@@ -222,7 +302,7 @@ function draw() {
 
   letters.forEach(({ path, i }) => {
     ctx.beginPath();
-    executePath(path, x, y, i, sw);
+    executePath(path, x, y, i, sw, rounding);
     ctx.stroke();
   });
 
