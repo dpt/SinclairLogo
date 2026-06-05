@@ -35,6 +35,7 @@ No build step. Open `index.html` directly in a browser.
 | **Text** | The string to render. A–Z, 0–9, and space; case-insensitive. Unrecognised characters render as a crossed box. |
 | **Stroke width** | Thickness of each line segment. |
 | **Connect** | Size of the internal offset used where glyphs connect back to themselves, as a fraction of stroke width. Ranges from 0 to 2× stroke width; default is 0.5×. |
+| **Diagonal** | Size of the diagonal offset used in V, X, and Z, as a fraction of stroke width. Ranges from 0 to 2× stroke width; default is 0.5×. |
 | **Wide character width** | Horizontal span of standard-width glyphs (most letters and digits). |
 | **Very wide char width** | Horizontal span of double-wide glyphs (M and W only). |
 | **Spacing** | Gap between glyphs. |
