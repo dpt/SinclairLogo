@@ -15,6 +15,7 @@ const h3Slider = document.getElementById("h3");
 const scaleSlider = document.getElementById("scale");
 const roundingSlider = document.getElementById("rounding");
 const roundedToggle = document.getElementById("rounded");
+const manicToggle = document.getElementById("manic");
 const gridToggle = document.getElementById("grid");
 const coloursSelect = document.getElementById("colours");
 const resetButton = document.getElementById("reset");
@@ -35,6 +36,7 @@ const allControls = [
   scaleSlider,
   roundingSlider,
   roundedToggle,
+  manicToggle,
   gridToggle,
   coloursSelect,
 ];
@@ -195,6 +197,9 @@ function executePath(path, x, y, i, sw, rounding, connect, diagonal) {
   }
 }
 
+const SPECTRUM_MANIC = ["#FF0000", "#FFFF00", "#00FF00", "#00FFFF", "#0000FF", "#FF00FF"];
+const MANIC_SHIFTS = [0, -1, 0, -2, -1, -2, 0, -1, 0, -2];
+
 const UNKNOWN_PATH =
   "M X0,Y1 L X0,Y3 L X1,Y3 L X1,Y1 Z M X0+B,Y1+B L X1-B,Y3-B M X1-B,Y1+B L X0+B,Y3-B";
 
@@ -306,6 +311,7 @@ function draw() {
   const scale = scaleSlider.value; // overall scale
   const rounding = roundingSlider.value / 100; // corner rounding factor (0–0.5)
   const rounded = roundedToggle.checked;
+  const manic = manicToggle.checked;
   const grid = gridToggle.checked;
   const [fg, bg] = coloursSelect.value.split("|");
 
@@ -352,12 +358,15 @@ function draw() {
   ctx.lineWidth = sw;
   ctx.lineCap = rounded ? "round" : "square";
   ctx.lineJoin = rounded ? "round" : "miter";
-  ctx.strokeStyle = fg;
 
-  letters.forEach(({ path, i }) => {
+  letters.forEach(({ path, i }, idx) => {
+    ctx.strokeStyle = manic ? SPECTRUM_MANIC[idx % SPECTRUM_MANIC.length] : fg;
+    ctx.save();
+    if (manic) ctx.translate(0, MANIC_SHIFTS[idx % MANIC_SHIFTS.length] * sw);
     ctx.beginPath();
     executePath(path, x, y, i, sw, rounding, connect, diagonal);
     ctx.stroke();
+    ctx.restore();
   });
 
   ctx.restore();
