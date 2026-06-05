@@ -20,6 +20,7 @@ const tileToggle = document.getElementById("tile");
 const gridToggle = document.getElementById("grid");
 const coloursSelect = document.getElementById("colours");
 const resetButton = document.getElementById("reset");
+const randomiseButton = document.getElementById("randomise");
 
 const allControls = document.querySelectorAll(
   ".controls input, .controls select, .controls textarea",
@@ -38,6 +39,22 @@ resetButton.addEventListener("click", () => {
       if (el.selectedIndex === -1) el.selectedIndex = 0;
     } else {
       el.value = el.defaultValue;
+    }
+  });
+  draw();
+});
+
+randomiseButton.addEventListener("click", () => {
+  allControls.forEach((el) => {
+    if (el.tagName === "TEXTAREA") return;
+    if (el.id === "grid" || el.id === "scale") return;
+    if (el.type === "checkbox") {
+      el.checked = Math.random() < 0.3;
+    } else if (el.tagName === "SELECT") {
+      el.selectedIndex = Math.floor(Math.random() * el.options.length);
+    } else if (el.type === "range") {
+      const min = +el.min, max = +el.max;
+      el.value = Math.floor(Math.random() * (max - min + 1)) + min;
     }
   });
   draw();
