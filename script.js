@@ -16,6 +16,7 @@ const scaleSlider = document.getElementById("scale");
 const roundingSlider = document.getElementById("rounding");
 const roundedToggle = document.getElementById("rounded");
 const manicToggle = document.getElementById("manic");
+const tileToggle = document.getElementById("tile");
 const gridToggle = document.getElementById("grid");
 const coloursSelect = document.getElementById("colours");
 const resetButton = document.getElementById("reset");
@@ -37,6 +38,7 @@ const allControls = [
   roundingSlider,
   roundedToggle,
   manicToggle,
+  tileToggle,
   gridToggle,
   coloursSelect,
 ];
@@ -50,7 +52,9 @@ resetButton.addEventListener("click", () => {
     if (el.type === "checkbox") {
       el.checked = el.defaultChecked;
     } else if (el.tagName === "SELECT") {
-      el.selectedIndex = Array.from(el.options).findIndex((o) => o.defaultSelected);
+      el.selectedIndex = Array.from(el.options).findIndex(
+        (o) => o.defaultSelected,
+      );
       if (el.selectedIndex === -1) el.selectedIndex = 0;
     } else {
       el.value = el.defaultValue;
@@ -197,7 +201,14 @@ function executePath(path, x, y, i, sw, rounding, connect, diagonal) {
   }
 }
 
-const SPECTRUM_MANIC = ["#FF0000", "#FFFF00", "#00FF00", "#00FFFF", "#0000FF", "#FF00FF"];
+const SPECTRUM_MANIC = [
+  "#FF0000",
+  "#FFFF00",
+  "#00FF00",
+  "#00FFFF",
+  "#0000FF",
+  "#FF00FF",
+];
 const MANIC_SHIFTS = [0, -1, 0, -2, -1, -2, 0, -1, 0, -2];
 
 const UNKNOWN_PATH =
@@ -205,6 +216,7 @@ const UNKNOWN_PATH =
 
 const drawFns = {
   " ": { path: "", width: 0 },
+  "!": { path: "M X0,Y1 L X0,Y1 M X0,Y2 L X0,Y4", width: 0 },
   0: {
     path: "M X0,Y1 L X0,Y3 L X1,Y3 L X1,Y1 Z M X0+B,Y1+B L X1-B,Y3-B",
     width: 1,
@@ -256,6 +268,7 @@ const drawFns = {
     path: "M X1,Y1 L X0,Y1 L X0,Y1+D L X1,Y3-D L X1,Y3 L X0,Y3",
     width: 1,
   },
+  "-": { path: "M X0,Y2 L X1,Y2", width: 1 },
   "`": {
     path: "M X0+3.0s,Y0 L X1,Y0 M X0+0.6s,Y1 L X1-0.6s,Y1 M X0+0.4s,Y2 L X1-0.4s,Y2 M X0+1.1s,Y3 L X1-1.1s,Y3 M X0+2.2s,Y4 L X1-2.2s,Y4",
     width: 1,
@@ -312,6 +325,7 @@ function draw() {
   const rounding = roundingSlider.value / 100; // corner rounding factor (0–0.5)
   const rounded = roundedToggle.checked;
   const manic = manicToggle.checked;
+  const tile = tileToggle.checked;
   const grid = gridToggle.checked;
   const [fg, bg] = coloursSelect.value.split("|");
 
@@ -338,13 +352,45 @@ function draw() {
   // Set overall transform
   const numLines = lines.length;
   const offsetX = (canvas.width - maxWidth * scale) / 2;
-  const offsetY = (canvas.height + (y[5] + y[0]) * scale - (numLines - 1) * lineSpacing * scale) / 2;
+  const offsetY =
+    (canvas.height +
+      (y[5] + y[0]) * scale -
+      (numLines - 1) * lineSpacing * scale) /
+    2;
   ctx.translate(offsetX, offsetY);
   ctx.scale(scale, -scale);
 
   ctx.lineWidth = sw;
   ctx.lineCap = rounded ? "round" : "square";
   ctx.lineJoin = rounded ? "round" : "miter";
+
+  if (tile) {
+    const xStep = maxWidth + s * 2;
+    const yStep = numLines * lineSpacing;
+    const nx = xStep > 0 ? Math.ceil(canvas.width / (xStep * scale)) + 1 : 0;
+    const ny = yStep > 0 ? Math.ceil(canvas.height / (yStep * scale)) + 1 : 0;
+    ctx.strokeStyle = fg;
+    ctx.globalAlpha = 0.1;
+    for (let gy = -ny; gy <= ny; gy++) {
+      for (let gx = -nx; gx <= nx; gx++) {
+        if (gx === 0 && gy === 0) continue;
+        ctx.save();
+        ctx.translate(gx * xStep, gy * yStep);
+        lineLayouts.forEach(({ x, letters, width }, lineIdx) => {
+          ctx.save();
+          ctx.translate((maxWidth - width) / 2, -lineIdx * lineSpacing);
+          letters.forEach(({ path, i }) => {
+            ctx.beginPath();
+            executePath(path, x, y, i, sw, rounding, connect, diagonal);
+            ctx.stroke();
+          });
+          ctx.restore();
+        });
+        ctx.restore();
+      }
+    }
+    ctx.globalAlpha = 1.0;
+  }
 
   let glyphIdx = 0;
   lineLayouts.forEach(({ x, letters, width }, lineIdx) => {
@@ -373,9 +419,12 @@ function draw() {
     }
 
     letters.forEach(({ path, i }) => {
-      ctx.strokeStyle = manic ? SPECTRUM_MANIC[glyphIdx % SPECTRUM_MANIC.length] : fg;
+      ctx.strokeStyle = manic
+        ? SPECTRUM_MANIC[glyphIdx % SPECTRUM_MANIC.length]
+        : fg;
       ctx.save();
-      if (manic) ctx.translate(0, MANIC_SHIFTS[glyphIdx % MANIC_SHIFTS.length] * sw);
+      if (manic)
+        ctx.translate(0, MANIC_SHIFTS[glyphIdx % MANIC_SHIFTS.length] * sw);
       ctx.beginPath();
       executePath(path, x, y, i, sw, rounding, connect, diagonal);
       ctx.stroke();
