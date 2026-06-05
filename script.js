@@ -47,6 +47,9 @@ resetButton.addEventListener("click", () => {
   allControls.forEach((el) => {
     if (el.type === "checkbox") {
       el.checked = el.defaultChecked;
+    } else if (el.tagName === "SELECT") {
+      el.selectedIndex = Array.from(el.options).findIndex((o) => o.defaultSelected);
+      if (el.selectedIndex === -1) el.selectedIndex = 0;
     } else {
       el.value = el.defaultValue;
     }

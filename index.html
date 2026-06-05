@@ -125,18 +125,6 @@
         </div>
         <hr>
         <div class="control">
-            <label for="strokeWidth">Stroke width:</label>
-            <input type="range" id="strokeWidth" name="strokeWidth" min="1" max="20" value="14" title="Thickness of each line segment.">
-        </div>
-        <div class="control">
-            <label for="connect">Connect:</label>
-            <input type="range" id="connect" name="connect" min="0" max="20" value="5" title="Size of the internal offset used where glyphs connect back to themselves, as a fraction of stroke width. Ranges from 0 to 2× stroke width; default is 0.5×.">
-        </div>
-        <div class="control">
-            <label for="diagonal">Diagonal:</label>
-            <input type="range" id="diagonal" name="diagonal" min="0" max="20" value="5" title="Size of the diagonal offset used in V, X, and Z, as a fraction of stroke width. Ranges from 0 to 2× stroke width; default is 0.5×.">
-        </div>
-        <div class="control">
             <label for="w0">Wide character width:</label>
             <input type="range" id="w0" name="w0" min="1" max="40" value="10" title="Horizontal span of standard-width glyphs (most letters and digits).">
         </div>
@@ -173,6 +161,19 @@
             <input type="range" id="scale" name="scale" min="1" max="40" value="12" title="Overall size multiplier.">
         </div>
         <hr>
+        <div class="control">
+            <label for="connect">Connect:</label>
+            <input type="range" id="connect" name="connect" min="0" max="20" value="5" title="Size of the internal offset used where glyphs connect back to themselves, as a fraction of stroke width. Ranges from 0 to 2× stroke width; default is 0.5×.">
+        </div>
+        <div class="control">
+            <label for="diagonal">Diagonal:</label>
+            <input type="range" id="diagonal" name="diagonal" min="0" max="20" value="5" title="Size of the diagonal offset used in V, X, and Z, as a fraction of stroke width. Ranges from 0 to 2× stroke width; default is 0.5×.">
+        </div>
+        <hr>
+        <div class="control">
+            <label for="strokeWidth">Stroke width:</label>
+            <input type="range" id="strokeWidth" name="strokeWidth" min="1" max="20" value="14" title="Thickness of each line segment.">
+        </div>
         <div class="control">
             <label for="rounding">Round corners:</label>
             <input type="range" id="rounding" name="rounding" min="0" max="50" value="0" title="Rounds path corners using quadratic curves; slide to control the degree.">
