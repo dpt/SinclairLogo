@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
+    <meta charset="utf-8">
     <title>Sinclair-O-Matic</title>
     <style>
         *, *::before, *::after { box-sizing: border-box; }
@@ -120,74 +121,74 @@
     <div class="controls">
         <div class="control">
             <label for="text">Text:</label>
-            <input type="text" id="text" name="text" value="SINCLAIR">
+            <input type="text" id="text" name="text" value="SINCLAIR" title="The string to render. A–Z, 0–9, and space; case-insensitive. Unrecognised characters render as a crossed box.">
         </div>
         <hr>
         <div class="control">
             <label for="strokeWidth">Stroke width:</label>
-            <input type="range" id="strokeWidth" name="strokeWidth" min="1" max="20" value="14">
+            <input type="range" id="strokeWidth" name="strokeWidth" min="1" max="20" value="14" title="Thickness of each line segment.">
         </div>
         <div class="control">
             <label for="connect">Connect:</label>
-            <input type="range" id="connect" name="connect" min="0" max="20" value="5">
+            <input type="range" id="connect" name="connect" min="0" max="20" value="5" title="Size of the internal offset used where glyphs connect back to themselves, as a fraction of stroke width. Ranges from 0 to 2× stroke width; default is 0.5×.">
         </div>
         <div class="control">
             <label for="diagonal">Diagonal:</label>
-            <input type="range" id="diagonal" name="diagonal" min="0" max="20" value="5">
+            <input type="range" id="diagonal" name="diagonal" min="0" max="20" value="5" title="Size of the diagonal offset used in V, X, and Z, as a fraction of stroke width. Ranges from 0 to 2× stroke width; default is 0.5×.">
         </div>
         <div class="control">
             <label for="w0">Wide character width:</label>
-            <input type="range" id="w0" name="w0" min="1" max="40" value="10">
+            <input type="range" id="w0" name="w0" min="1" max="40" value="10" title="Horizontal span of standard-width glyphs (most letters and digits).">
         </div>
         <div class="control">
             <label for="w1">Very wide char width:</label>
-            <input type="range" id="w1" name="w1" min="1" max="60" value="8">
+            <input type="range" id="w1" name="w1" min="1" max="60" value="8" title="Horizontal span of double-wide glyphs (M and W only).">
         </div>
         <div class="control">
             <label for="s">Spacing:</label>
-            <input type="range" id="s" name="s" min="1" max="40" value="10">
+            <input type="range" id="s" name="s" min="1" max="40" value="10" title="Gap between glyphs.">
         </div>
         <div class="control">
             <label for="h0">Bottom height:</label>
-            <input type="range" id="h0" name="h0" min="1" max="40" value="10">
+            <input type="range" id="h0" name="h0" min="1" max="40" value="10" title="Height of the lower zone, from baseline up to the mid-point.">
         </div>
         <div class="control">
             <label for="h1">Upper height:</label>
-            <input type="range" id="h1" name="h1" min="1" max="40" value="10">
+            <input type="range" id="h1" name="h1" min="1" max="40" value="10" title="Height of the upper zone, from mid-point up to cap height.">
         </div>
         <div class="control">
             <label for="t">Upper spacing:</label>
-            <input type="range" id="t" name="t" min="1" max="40" value="20">
+            <input type="range" id="t" name="t" min="1" max="40" value="20" title="Gap between cap height and the ascender zone.">
         </div>
         <div class="control">
             <label for="h2">Ascender height:</label>
-            <input type="range" id="h2" name="h2" min="0" max="39" value="0">
+            <input type="range" id="h2" name="h2" min="0" max="39" value="0" title="How far ascenders extend above cap height. Affects B, H, L, T. Set to 0 to disable the ascender zone entirely.">
         </div>
         <div class="control">
             <label for="h3">Descender height:</label>
-            <input type="range" id="h3" name="h3" min="0" max="39" value="20">
+            <input type="range" id="h3" name="h3" min="0" max="39" value="20" title="How far descenders extend below the baseline. Affects G, J, P, Q, Y. Set to 0 to disable.">
         </div>
         <div class="control">
             <label for="scale">Scale:</label>
-            <input type="range" id="scale" name="scale" min="1" max="40" value="12">
+            <input type="range" id="scale" name="scale" min="1" max="40" value="12" title="Overall size multiplier.">
         </div>
         <hr>
         <div class="control">
             <label for="rounding">Round corners:</label>
-            <input type="range" id="rounding" name="rounding" min="0" max="50" value="0">
+            <input type="range" id="rounding" name="rounding" min="0" max="50" value="0" title="Rounds path corners using quadratic curves; slide to control the degree.">
         </div>
         <div class="control">
             <label for="rounded">Round strokes:</label>
-            <input type="checkbox" id="rounded" name="rounded">
+            <input type="checkbox" id="rounded" name="rounded" title="Toggles between round and square stroke caps and joins.">
         </div>
         <hr>
         <div class="control">
             <label for="grid">Grid:</label>
-            <input type="checkbox" id="grid" name="grid">
+            <input type="checkbox" id="grid" name="grid" title="Overlays the constraint grid: red vertical lines mark x-positions, blue horizontal lines mark y-positions.">
         </div>
         <div class="control">
             <label for="colours">Colours:</label>
-            <select id="colours" name="colours">
+            <select id="colours" name="colours" title="Selects a foreground/background colour scheme from ten ZX Spectrum palette combinations.">
                 <option value="#000000|#FFFFFF">Black on White</option>
                 <option value="#FFFFFF|#000000">White on Black</option>
                 <option value="#0000FF|#FFFF00">Blue on Yellow</option>
@@ -201,7 +202,7 @@
             </select>
         </div>
         <hr>
-        <button id="reset">Reset</button>
+        <button id="reset" title="Restores all controls to their defaults.">Reset</button>
     </div>
 </div>
 <p><a href="https://github.com/dpt/SinclairLogo">View source on GitHub</a></p>
