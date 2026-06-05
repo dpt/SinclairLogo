@@ -2,6 +2,7 @@ const canvas = document.getElementById("myCanvas");
 const ctx = canvas.getContext("2d");
 const textInput = document.getElementById("text");
 const strokeWidthSlider = document.getElementById("strokeWidth");
+const connectSlider = document.getElementById("connect");
 const w0Slider = document.getElementById("w0");
 const w1Slider = document.getElementById("w1");
 const sSlider = document.getElementById("s");
@@ -20,6 +21,7 @@ const resetButton = document.getElementById("reset");
 const allControls = [
   textInput,
   strokeWidthSlider,
+  connectSlider,
   w0Slider,
   w1Slider,
   sSlider,
@@ -58,11 +60,12 @@ resetButton.addEventListener("click", () => {
 // y[4] = ascender gap
 // y[5] = ascender top
 
-// Path notation: X0/X1/X2 = x[i+0]/x[i+1]/x[i+2]; Y0–Y5 = y[0]–y[5]; +Ns/-Ns = ±N*sw offset
-function resolveCoord(str, x, y, i, sw) {
-  const m = str.match(/^([XY])(\d)(([+-]\d+\.?\d*)s)?$/);
+// Path notation: X0/X1/X2 = x[i+0]/x[i+1]/x[i+2]; Y0–Y5 = y[0]–y[5]; +Ns/-Ns = ±N*sw offset; +B/-B = ±connect
+function resolveCoord(str, x, y, i, sw, connect) {
+  const m = str.match(/^([XY])(\d)(([+-]\d+\.?\d*)s|([+-])B)?$/);
   const idx = parseInt(m[2]);
-  const off = m[3] ? parseFloat(m[4]) * sw : 0;
+  let off = 0;
+  if (m[3]) off = m[5] !== undefined ? (m[5] === "+" ? 1 : -1) * connect : parseFloat(m[4]) * sw;
   return (m[1] === "X" ? x[i + idx] : y[idx]) + off;
 }
 
@@ -140,7 +143,7 @@ function drawClosedSubpath(pts, rounding) {
   ctx.closePath();
 }
 
-function executePath(path, x, y, i, sw, rounding) {
+function executePath(path, x, y, i, sw, rounding, connect) {
   if (!path) return;
 
   const tokens = path.split(" ");
@@ -155,8 +158,8 @@ function executePath(path, x, y, i, sw, rounding) {
     const [xStr, yStr] = tokens[j++].split(",");
     raw.push({
       cmd,
-      px: resolveCoord(xStr, x, y, i, sw),
-      py: resolveCoord(yStr, x, y, i, sw),
+      px: resolveCoord(xStr, x, y, i, sw, connect),
+      py: resolveCoord(yStr, x, y, i, sw, connect),
     });
   }
 
@@ -184,59 +187,59 @@ function executePath(path, x, y, i, sw, rounding) {
 }
 
 const UNKNOWN_PATH =
-  "M X0,Y1 L X0,Y3 L X1,Y3 L X1,Y1 Z M X0+0.5s,Y1+0.5s L X1-0.5s,Y3-0.5s M X1-0.5s,Y1+0.5s L X0+0.5s,Y3-0.5s";
+  "M X0,Y1 L X0,Y3 L X1,Y3 L X1,Y1 Z M X0+B,Y1+B L X1-B,Y3-B M X1-B,Y1+B L X0+B,Y3-B";
 
 const drawFns = {
   " ": { path: "", width: 0 },
   0: {
-    path: "M X0,Y1 L X0,Y3 L X1,Y3 L X1,Y1 Z M X0+0.5s,Y1+0.5s L X1-0.5s,Y3-0.5s",
+    path: "M X0,Y1 L X0,Y3 L X1,Y3 L X1,Y1 Z M X0+B,Y1+B L X1-B,Y3-B",
     width: 1,
   },
   1: { path: "M X0,Y1 L X0,Y3", width: 0 },
   2: { path: "M X1,Y1 L X0,Y1 L X0,Y2 L X1,Y2 L X1,Y3 L X0,Y3", width: 1 },
-  3: { path: "M X0,Y3 L X1,Y3 L X1,Y1 L X0,Y1 M X1-0.5s,Y2 L X0,Y2", width: 1 },
+  3: { path: "M X0,Y3 L X1,Y3 L X1,Y1 L X0,Y1 M X1-B,Y2 L X0,Y2", width: 1 },
   4: { path: "M X0,Y3 L X0,Y2 L X1,Y2 M X1,Y3 L X1,Y1", width: 1 },
   5: { path: "M X0,Y1 L X1,Y1 L X1,Y2 L X0,Y2 L X0,Y3 L X1,Y3", width: 1 },
-  6: { path: "M X1,Y3 L X0,Y3 L X0,Y1 L X1,Y1 L X1,Y2 L X0+0.5s,Y2", width: 1 },
+  6: { path: "M X1,Y3 L X0,Y3 L X0,Y1 L X1,Y1 L X1,Y2 L X0+B,Y2", width: 1 },
   7: { path: "M X0,Y3 L X1,Y3 L X1,Y1", width: 1 },
   8: {
-    path: "M X0,Y3 L X1,Y3 L X1,Y1 L X0,Y1 Z M X0+0.5s,Y2 L X1-0.5s,Y2",
+    path: "M X0,Y3 L X1,Y3 L X1,Y1 L X0,Y1 Z M X0+B,Y2 L X1-B,Y2",
     width: 1,
   },
-  9: { path: "M X0,Y1 L X1,Y1 L X1,Y3 L X0,Y3 L X0,Y2 L X1-0.5s,Y2", width: 1 },
-  A: { path: "M X1-0.5s,Y2 L X0,Y2 L X0,Y1 L X1,Y1 L X1,Y3 L X0,Y3", width: 1 },
-  B: { path: "M X0,Y5 L X0,Y1 L X1,Y1 L X1,Y3 L X0+0.5s,Y3", width: 1 },
+  9: { path: "M X0,Y1 L X1,Y1 L X1,Y3 L X0,Y3 L X0,Y2 L X1-B,Y2", width: 1 },
+  A: { path: "M X1-B,Y2 L X0,Y2 L X0,Y1 L X1,Y1 L X1,Y3 L X0,Y3", width: 1 },
+  B: { path: "M X0,Y5 L X0,Y1 L X1,Y1 L X1,Y3 L X0+B,Y3", width: 1 },
   C: { path: "M X1,Y1 L X0,Y1 L X0,Y3 L X1,Y3", width: 1 },
-  D: { path: "M X1,Y5 L X1,Y1 L X0,Y1 L X0,Y3 L X1-0.5s,Y3", width: 1 },
-  E: { path: "M X0+0.5s,Y2 L X1,Y2 L X1,Y3 L X0,Y3 L X0,Y1 L X1,Y1", width: 1 },
-  F: { path: "M X0,Y1 L X0,Y3 L X1,Y3 M X0+0.5s,Y2 L X1,Y2", width: 1 },
-  G: { path: "M X1-0.5s,Y1 L X0,Y1 L X0,Y3 L X1,Y3 L X1,Y0 L X0,Y0", width: 1 },
-  H: { path: "M X0,Y5 L X0,Y1 M X0+0.5s,Y3 L X1,Y3 L X1,Y1", width: 1 },
+  D: { path: "M X1,Y5 L X1,Y1 L X0,Y1 L X0,Y3 L X1-B,Y3", width: 1 },
+  E: { path: "M X0+B,Y2 L X1,Y2 L X1,Y3 L X0,Y3 L X0,Y1 L X1,Y1", width: 1 },
+  F: { path: "M X0,Y1 L X0,Y3 L X1,Y3 M X0+B,Y2 L X1,Y2", width: 1 },
+  G: { path: "M X1-B,Y1 L X0,Y1 L X0,Y3 L X1,Y3 L X1,Y0 L X0,Y0", width: 1 },
+  H: { path: "M X0,Y5 L X0,Y1 M X0+B,Y3 L X1,Y3 L X1,Y1", width: 1 },
   I: { path: "M X0,Y1 L X0,Y3 M X0,Y4 L X0,Y4", width: 0 },
   J: { path: "M X0,Y0 L X0,Y3 M X0,Y4 L X0,Y4", width: 0 },
   K: {
-    path: "M X0,Y5 L X0,Y1 M X1-1.0s,Y3 L X1-1.0s,Y2+0.5s M X0+0.5s,Y2 L X1,Y2 L X1,Y1",
+    path: "M X0,Y5 L X0,Y1 M X1-1.0s,Y3 L X1-1.0s,Y2+B M X0+B,Y2 L X1,Y2 L X1,Y1",
     width: 1,
   },
   L: { path: "M X0,Y1 L X0,Y5", width: 0 },
-  M: { path: "M X0,Y1 L X0,Y3 L X2,Y3 L X2,Y1 M X1,Y1 L X1,Y3-0.5s", width: 2 },
+  M: { path: "M X0,Y1 L X0,Y3 L X2,Y3 L X2,Y1 M X1,Y1 L X1,Y3-B", width: 2 },
   N: { path: "M X0,Y1 L X0,Y3 L X1,Y3 L X1,Y1", width: 1 },
   O: { path: "M X0,Y1 L X0,Y3 L X1,Y3 L X1,Y1 Z", width: 1 },
-  P: { path: "M X0,Y0 L X0,Y3 L X1,Y3 L X1,Y1 L X0+0.5s,Y1", width: 1 },
-  Q: { path: "M X1,Y0 L X1,Y3 L X0,Y3 L X0,Y1 L X1-0.5s,Y1", width: 1 },
+  P: { path: "M X0,Y0 L X0,Y3 L X1,Y3 L X1,Y1 L X0+B,Y1", width: 1 },
+  Q: { path: "M X1,Y0 L X1,Y3 L X0,Y3 L X0,Y1 L X1-B,Y1", width: 1 },
   R: { path: "M X0,Y1 L X0,Y3 L X1,Y3", width: 1 },
   S: { path: "M X0,Y1 L X1,Y1 L X1,Y2 L X0,Y2 L X0,Y3 L X1,Y3", width: 1 },
-  T: { path: "M X0,Y5 L X0,Y1 L X1,Y1 M X0+0.5s,Y3 L X1,Y3", width: 1 },
+  T: { path: "M X0,Y5 L X0,Y1 L X1,Y1 M X0+B,Y3 L X1,Y3", width: 1 },
   U: { path: "M X0,Y3 L X0,Y1 L X1,Y1 L X1,Y3", width: 1 },
-  V: { path: "M X0,Y3 L X0,Y1 L X0+1.0s,Y1 L X1,Y3-1.0s L X1,Y3", width: 1 },
-  W: { path: "M X0,Y3 L X0,Y1 L X2,Y1 L X2,Y3 M X1,Y3 L X1,Y1+0.5s", width: 2 },
+  V: { path: "M X0,Y3 L X0,Y1 L X0+B,Y1 L X1,Y3-B L X1,Y3", width: 1 },
+  W: { path: "M X0,Y3 L X0,Y1 L X2,Y1 L X2,Y3 M X1,Y3 L X1,Y1+B", width: 2 },
   X: {
-    path: "M X0,Y1 L X0+0.5s,Y1 L X1-0.5s,Y3 L X1,Y3 M X1,Y1 L X1-0.5s,Y1 L X0+0.5s,Y3 L X0,Y3",
+    path: "M X0,Y1 L X0+B,Y1 L X1-B,Y3 L X1,Y3 M X1,Y1 L X1-B,Y1 L X0+B,Y3 L X0,Y3",
     width: 1,
   },
-  Y: { path: "M X0,Y3 L X0,Y1 L X1-0.5s,Y1 M X0,Y0 L X1,Y0 L X1,Y3", width: 1 },
+  Y: { path: "M X0,Y3 L X0,Y1 L X1-B,Y1 M X0,Y0 L X1,Y0 L X1,Y3", width: 1 },
   Z: {
-    path: "M X1,Y1 L X0,Y1 L X0,Y1+0.5s L X1,Y3-0.5s L X1,Y3 L X0,Y3",
+    path: "M X1,Y1 L X0,Y1 L X0,Y1+B L X1,Y3-B L X1,Y3 L X0,Y3",
     width: 1,
   },
   "`": {
@@ -281,6 +284,7 @@ function draw() {
   // Configure
   const text = textInput.value;
   const sw = strokeWidthSlider.value / 10; // stroke width
+  const connect = (connectSlider.value / 10) * sw; // connect offset (0–2*sw)
   const w0 = (8 * w0Slider.value) / 10; // char width
   const w1 = (8 * w1Slider.value) / 10; // very wide char width
   const s = sSlider.value / 10; // spacing
@@ -342,7 +346,7 @@ function draw() {
 
   letters.forEach(({ path, i }) => {
     ctx.beginPath();
-    executePath(path, x, y, i, sw, rounding);
+    executePath(path, x, y, i, sw, rounding, connect);
     ctx.stroke();
   });
 
