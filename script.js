@@ -191,7 +191,7 @@ const drawFns = {
   S: { path: "M X0,Y1 L X1,Y1 L X1,Y2 L X0,Y2 L X0,Y3 L X1,Y3", width: 1 },
   T: { path: "M X0,Y5 L X0,Y1 L X1,Y1 M X0+0.5s,Y3 L X1,Y3", width: 1 },
   U: { path: "M X0,Y3 L X0,Y1 L X1,Y1 L X1,Y3", width: 1 },
-  V: { path: "M X0,Y3 L X0,Y1 L X0+1.0s,Y1 L X1,Y2 L X1,Y3", width: 1 },
+  V: { path: "M X0,Y3 L X0,Y1 L X0+1.0s,Y1 L X1,Y3-1.0s L X1,Y3", width: 1 },
   W: { path: "M X0,Y3 L X0,Y1 L X2,Y1 L X2,Y3 M X1,Y3 L X1,Y1+0.5s", width: 2 },
   X: {
     path: "M X0,Y1 L X0+0.5s,Y1 L X1-0.5s,Y3 L X1,Y3 M X1,Y1 L X1-0.5s,Y1 L X0+0.5s,Y3 L X0,Y3",
