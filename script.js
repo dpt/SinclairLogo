@@ -315,8 +315,7 @@ function draw() {
   const grid = gridToggle.checked;
   const [fg, bg] = coloursSelect.value.split("|");
 
-  // Calculate points
-  const { x, letters, width } = buildLayout(text, w0, w1, s);
+  // Calculate y-levels (shared across all lines)
   const y = [];
   y[0] = -h3;
   y[1] = 0;
@@ -325,6 +324,11 @@ function draw() {
   y[4] = y[3] + t;
   y[5] = y[4] + h2;
 
+  const lineSpacing = y[5] - y[0] + s;
+  const lines = text.split("\n");
+  const lineLayouts = lines.map((line) => buildLayout(line, w0, w1, s));
+  const maxWidth = lineLayouts.reduce((m, l) => Math.max(m, l.width), 0);
+
   // Clear the background
   ctx.fillStyle = bg;
   ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -332,40 +336,53 @@ function draw() {
   ctx.save();
 
   // Set overall transform
-  const offsetX = (canvas.width - width * scale) / 2;
-  const offsetY = (canvas.height + (y[5] + y[0]) * scale) / 2;
+  const numLines = lines.length;
+  const offsetX = (canvas.width - maxWidth * scale) / 2;
+  const offsetY = (canvas.height + (y[5] + y[0]) * scale - (numLines - 1) * lineSpacing * scale) / 2;
   ctx.translate(offsetX, offsetY);
   ctx.scale(scale, -scale);
-
-  if (grid) {
-    ctx.lineWidth = 0.1;
-    ctx.strokeStyle = "red";
-    ctx.beginPath();
-    x.forEach((xi) => {
-      ctx.moveTo(xi, -1000);
-      ctx.lineTo(xi, +1000);
-    });
-    ctx.stroke();
-    ctx.strokeStyle = "blue";
-    ctx.beginPath();
-    y.forEach((yi) => {
-      ctx.moveTo(-1000, yi);
-      ctx.lineTo(+1000, yi);
-    });
-    ctx.stroke();
-  }
 
   ctx.lineWidth = sw;
   ctx.lineCap = rounded ? "round" : "square";
   ctx.lineJoin = rounded ? "round" : "miter";
 
-  letters.forEach(({ path, i }, idx) => {
-    ctx.strokeStyle = manic ? SPECTRUM_MANIC[idx % SPECTRUM_MANIC.length] : fg;
+  let glyphIdx = 0;
+  lineLayouts.forEach(({ x, letters, width }, lineIdx) => {
+    const lineX = (maxWidth - width) / 2;
+
     ctx.save();
-    if (manic) ctx.translate(0, MANIC_SHIFTS[idx % MANIC_SHIFTS.length] * sw);
-    ctx.beginPath();
-    executePath(path, x, y, i, sw, rounding, connect, diagonal);
-    ctx.stroke();
+    ctx.translate(lineX, -lineIdx * lineSpacing);
+
+    if (grid) {
+      ctx.lineWidth = 0.1;
+      ctx.strokeStyle = "red";
+      ctx.beginPath();
+      x.forEach((xi) => {
+        ctx.moveTo(xi, -1000);
+        ctx.lineTo(xi, +1000);
+      });
+      ctx.stroke();
+      ctx.strokeStyle = "blue";
+      ctx.beginPath();
+      y.forEach((yi) => {
+        ctx.moveTo(-1000, yi);
+        ctx.lineTo(+1000, yi);
+      });
+      ctx.stroke();
+      ctx.lineWidth = sw;
+    }
+
+    letters.forEach(({ path, i }) => {
+      ctx.strokeStyle = manic ? SPECTRUM_MANIC[glyphIdx % SPECTRUM_MANIC.length] : fg;
+      ctx.save();
+      if (manic) ctx.translate(0, MANIC_SHIFTS[glyphIdx % MANIC_SHIFTS.length] * sw);
+      ctx.beginPath();
+      executePath(path, x, y, i, sw, rounding, connect, diagonal);
+      ctx.stroke();
+      ctx.restore();
+      glyphIdx++;
+    });
+
     ctx.restore();
   });
 

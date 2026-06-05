@@ -89,12 +89,19 @@
             padding: 2px 4px;
         }
 
-        .control input[type="text"] {
+        .control input[type="text"],
+        .control textarea {
             width: 110px;
             font: inherit;
+            font-size: 0.8125rem;
             border: 1px solid #d0d0d0;
             border-radius: 4px;
             padding: 2px 6px;
+        }
+
+        .control textarea {
+            resize: vertical;
+            align-self: flex-start;
         }
 
         .controls button {
@@ -121,7 +128,7 @@
     <div class="controls">
         <div class="control">
             <label for="text">Text:</label>
-            <input type="text" id="text" name="text" value="SINCLAIR" title="The string to render. A–Z, 0–9, and space; case-insensitive. Unrecognised characters render as a crossed box.">
+            <textarea id="text" name="text" rows="3" title="The string to render. A–Z, 0–9, and space; case-insensitive. Unrecognised characters render as a crossed box. Use newlines to render multiple lines.">SINCLAIR</textarea>
         </div>
         <hr>
         <div class="control">
