@@ -21,31 +21,11 @@ const gridToggle = document.getElementById("grid");
 const coloursSelect = document.getElementById("colours");
 const resetButton = document.getElementById("reset");
 
-const allControls = [
-  textInput,
-  strokeWidthSlider,
-  connectSlider,
-  diagonalSlider,
-  w0Slider,
-  w1Slider,
-  sSlider,
-  h0Slider,
-  h1Slider,
-  tSlider,
-  h2Slider,
-  h3Slider,
-  scaleSlider,
-  roundingSlider,
-  roundedToggle,
-  manicToggle,
-  tileToggle,
-  gridToggle,
-  coloursSelect,
-];
+const allControls = document.querySelectorAll(
+  ".controls input, .controls select, .controls textarea",
+);
 
-allControls.forEach((el) => {
-  el.addEventListener("input", draw);
-});
+allControls.forEach((el) => el.addEventListener("input", draw));
 
 resetButton.addEventListener("click", () => {
   allControls.forEach((el) => {
@@ -104,26 +84,19 @@ function arcCorner(prev, corner, next, rounding) {
 
 // Open subpath: round all internal (non-endpoint) corners.
 function drawOpenSubpath(pts, rounding) {
-  const n = pts.length;
   ctx.moveTo(pts[0].px, pts[0].py);
-  let logX = pts[0].px,
-    logY = pts[0].py;
-  for (let k = 1; k < n; k++) {
+  for (let k = 1; k < pts.length; k++) {
     const corner = pts[k];
     const next = pts[k + 1];
     if (next && rounding > 0) {
-      const arc = arcCorner({ px: logX, py: logY }, corner, next, rounding);
+      const arc = arcCorner(pts[k - 1], corner, next, rounding);
       if (arc) {
         ctx.lineTo(arc.m.px, arc.m.py);
         ctx.quadraticCurveTo(corner.px, corner.py, arc.n.px, arc.n.py);
-        logX = corner.px;
-        logY = corner.py;
         continue;
       }
     }
     ctx.lineTo(corner.px, corner.py);
-    logX = corner.px;
-    logY = corner.py;
   }
 }
 
@@ -160,45 +133,31 @@ function drawClosedSubpath(pts, rounding) {
 
 function executePath(path, x, y, i, sw, rounding, connect, diagonal) {
   if (!path) return;
-
   const tokens = path.split(" ");
-  const raw = [];
+  let pts = [];
   let j = 0;
+
+  const flush = (closed) => {
+    if (pts.length) {
+      (closed ? drawClosedSubpath : drawOpenSubpath)(pts, rounding);
+      pts = [];
+    }
+  };
+
   while (j < tokens.length) {
     const cmd = tokens[j++];
     if (cmd === "Z") {
-      raw.push({ cmd: "Z" });
+      flush(true);
       continue;
     }
+    if (cmd === "M") flush(false);
     const [xStr, yStr] = tokens[j++].split(",");
-    raw.push({
-      cmd,
+    pts.push({
       px: resolveCoord(xStr, x, y, i, sw, connect, diagonal),
       py: resolveCoord(yStr, x, y, i, sw, connect, diagonal),
     });
   }
-
-  let k = 0;
-  while (k < raw.length) {
-    if (raw[k].cmd !== "M") {
-      k++;
-      continue;
-    }
-    const { px: sx, py: sy } = raw[k++];
-    const pts = [{ px: sx, py: sy }];
-    let closed = false;
-    while (k < raw.length && raw[k].cmd !== "M") {
-      if (raw[k].cmd === "Z") {
-        closed = true;
-        k++;
-        break;
-      }
-      pts.push({ px: raw[k].px, py: raw[k].py });
-      k++;
-    }
-    if (closed) drawClosedSubpath(pts, rounding);
-    else drawOpenSubpath(pts, rounding);
-  }
+  flush(false);
 }
 
 const SPECTRUM_MANIC = [
@@ -290,16 +249,11 @@ function buildLayout(text, w0, w1, spc) {
     if (entry.width === 2) {
       x[i + 1] = pos + w1 - 1;
       x[i + 2] = pos + 2 * w1 - 2;
-      xi = i + 3;
-      pos = x[i + 2] + 1 + spc;
     } else if (entry.width === 1) {
       x[i + 1] = pos + w0 - 1;
-      xi = i + 2;
-      pos = x[i + 1] + 1 + spc;
-    } else {
-      xi = i + 1;
-      pos = x[i] + 1 + spc;
     }
+    xi = i + entry.width + 1;
+    pos = x[i + entry.width] + 1 + spc;
 
     letters.push({ path: entry.path, i, width: entry.width });
   }
