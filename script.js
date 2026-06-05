@@ -73,10 +73,14 @@ function arcCorner(prev, corner, next, rounding) {
   if (dab === 0 || dbc === 0) return null;
   const d = Math.min(dab, dbc) * rounding;
   return {
-    m: { px: corner.px - d * (corner.px - prev.px) / dab,
-         py: corner.py - d * (corner.py - prev.py) / dab },
-    n: { px: corner.px + d * (next.px - corner.px) / dbc,
-         py: corner.py + d * (next.py - corner.py) / dbc },
+    m: {
+      px: corner.px - (d * (corner.px - prev.px)) / dab,
+      py: corner.py - (d * (corner.py - prev.py)) / dab,
+    },
+    n: {
+      px: corner.px + (d * (next.px - corner.px)) / dbc,
+      py: corner.py + (d * (next.py - corner.py)) / dbc,
+    },
   };
 }
 
@@ -84,7 +88,8 @@ function arcCorner(prev, corner, next, rounding) {
 function drawOpenSubpath(pts, rounding) {
   const n = pts.length;
   ctx.moveTo(pts[0].px, pts[0].py);
-  let logX = pts[0].px, logY = pts[0].py;
+  let logX = pts[0].px,
+    logY = pts[0].py;
   for (let k = 1; k < n; k++) {
     const corner = pts[k];
     const next = pts[k + 1];
@@ -93,12 +98,14 @@ function drawOpenSubpath(pts, rounding) {
       if (arc) {
         ctx.lineTo(arc.m.px, arc.m.py);
         ctx.quadraticCurveTo(corner.px, corner.py, arc.n.px, arc.n.py);
-        logX = corner.px; logY = corner.py;
+        logX = corner.px;
+        logY = corner.py;
         continue;
       }
     }
     ctx.lineTo(corner.px, corner.py);
-    logX = corner.px; logY = corner.py;
+    logX = corner.px;
+    logY = corner.py;
   }
 }
 
@@ -113,7 +120,7 @@ function drawClosedSubpath(pts, rounding) {
     return;
   }
   const arcs = pts.map((p, idx) =>
-    arcCorner(pts[(idx - 1 + n) % n], p, pts[(idx + 1) % n], rounding)
+    arcCorner(pts[(idx - 1 + n) % n], p, pts[(idx + 1) % n], rounding),
   );
   const a0 = arcs[0];
   ctx.moveTo(a0 ? a0.n.px : pts[0].px, a0 ? a0.n.py : pts[0].py);
@@ -141,19 +148,33 @@ function executePath(path, x, y, i, sw, rounding) {
   let j = 0;
   while (j < tokens.length) {
     const cmd = tokens[j++];
-    if (cmd === "Z") { raw.push({ cmd: "Z" }); continue; }
+    if (cmd === "Z") {
+      raw.push({ cmd: "Z" });
+      continue;
+    }
     const [xStr, yStr] = tokens[j++].split(",");
-    raw.push({ cmd, px: resolveCoord(xStr, x, y, i, sw), py: resolveCoord(yStr, x, y, i, sw) });
+    raw.push({
+      cmd,
+      px: resolveCoord(xStr, x, y, i, sw),
+      py: resolveCoord(yStr, x, y, i, sw),
+    });
   }
 
   let k = 0;
   while (k < raw.length) {
-    if (raw[k].cmd !== "M") { k++; continue; }
+    if (raw[k].cmd !== "M") {
+      k++;
+      continue;
+    }
     const { px: sx, py: sy } = raw[k++];
     const pts = [{ px: sx, py: sy }];
     let closed = false;
     while (k < raw.length && raw[k].cmd !== "M") {
-      if (raw[k].cmd === "Z") { closed = true; k++; break; }
+      if (raw[k].cmd === "Z") {
+        closed = true;
+        k++;
+        break;
+      }
       pts.push({ px: raw[k].px, py: raw[k].py });
       k++;
     }
@@ -167,6 +188,22 @@ const UNKNOWN_PATH =
 
 const drawFns = {
   " ": { path: "", width: 0 },
+  0: {
+    path: "M X0,Y1 L X0,Y3 L X1,Y3 L X1,Y1 Z M X0+0.5s,Y1+0.5s L X1-0.5s,Y3-0.5s",
+    width: 1,
+  },
+  1: { path: "M X0,Y1 L X0,Y3", width: 0 },
+  2: { path: "M X1,Y1 L X0,Y1 L X0,Y2 L X1,Y2 L X1,Y3 L X0,Y3", width: 1 },
+  3: { path: "M X0,Y3 L X1,Y3 L X1,Y1 L X0,Y1 M X1-0.5s,Y2 L X0,Y2", width: 1 },
+  4: { path: "M X0,Y3 L X0,Y2 L X1,Y2 M X1,Y3 L X1,Y1", width: 1 },
+  5: { path: "M X0,Y1 L X1,Y1 L X1,Y2 L X0,Y2 L X0,Y3 L X1,Y3", width: 1 },
+  6: { path: "M X1,Y3 L X0,Y3 L X0,Y1 L X1,Y1 L X1,Y2 L X0+0.5s,Y2", width: 1 },
+  7: { path: "M X0,Y3 L X1,Y3 L X1,Y1", width: 1 },
+  8: {
+    path: "M X0,Y3 L X1,Y3 L X1,Y1 L X0,Y1 Z M X0+0.5s,Y2 L X1-0.5s,Y2",
+    width: 1,
+  },
+  9: { path: "M X0,Y1 L X1,Y1 L X1,Y3 L X0,Y3 L X0,Y2 L X1-0.5s,Y2", width: 1 },
   A: { path: "M X1-0.5s,Y2 L X0,Y2 L X0,Y1 L X1,Y1 L X1,Y3 L X0,Y3", width: 1 },
   B: { path: "M X0,Y5 L X0,Y1 L X1,Y1 L X1,Y3 L X0+0.5s,Y3", width: 1 },
   C: { path: "M X1,Y1 L X0,Y1 L X0,Y3 L X1,Y3", width: 1 },
@@ -198,21 +235,14 @@ const drawFns = {
     width: 1,
   },
   Y: { path: "M X0,Y3 L X0,Y1 L X1-0.5s,Y1 M X0,Y0 L X1,Y0 L X1,Y3", width: 1 },
-  Z: { path: "M X1,Y1 L X0,Y1 L X0,Y2 L X1,Y2 L X1,Y3 L X0,Y3", width: 1 },
+  Z: {
+    path: "M X1,Y1 L X0,Y1 L X0,Y1+0.5s L X1,Y3-0.5s L X1,Y3 L X0,Y3",
+    width: 1,
+  },
   "`": {
     path: "M X0+3.0s,Y0 L X1,Y0 M X0+0.6s,Y1 L X1-0.6s,Y1 M X0+0.4s,Y2 L X1-0.4s,Y2 M X0+1.1s,Y3 L X1-1.1s,Y3 M X0+2.2s,Y4 L X1-2.2s,Y4",
     width: 1,
   },
-  0: { path: "M X0,Y1 L X0,Y3 L X1,Y3 L X1,Y1 Z M X0+0.5s,Y1+0.5s L X1-0.5s,Y3-0.5s", width: 1 },
-  1: { path: "M X0,Y1 L X0,Y3", width: 0 },
-  2: { path: "M X1,Y1 L X0,Y1 L X0,Y2 L X1,Y2 L X1,Y3 L X0,Y3", width: 1 },
-  3: { path: "M X0,Y3 L X1,Y3 L X1,Y1 L X0,Y1 M X1-0.5s,Y2 L X0,Y2", width: 1 },
-  4: { path: "M X0,Y3 L X0,Y2 L X1,Y2 M X1,Y3 L X1,Y1", width: 1 },
-  5: { path: "M X0,Y1 L X1,Y1 L X1,Y2 L X0,Y2 L X0,Y3 L X1,Y3", width: 1 },
-  6: { path: "M X1,Y3 L X0,Y3 L X0,Y1 L X1,Y1 L X1,Y2 L X0+0.5s,Y2", width: 1 },
-  7: { path: "M X0,Y3 L X1,Y3 L X1,Y1", width: 1 },
-  8: { path: "M X0,Y3 L X1,Y3 L X1,Y1 L X0,Y1 Z M X0+0.5s,Y2 L X1-0.5s,Y2", width: 1 },
-  9: { path: "M X0,Y1 L X1,Y1 L X1,Y3 L X0,Y3 L X0,Y2 L X1-0.5s,Y2", width: 1 },
 };
 
 function buildLayout(text, w0, w1, spc) {

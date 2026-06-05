@@ -2,7 +2,7 @@
 
 The classic Sinclair computer logo is formed on a highly regular grid. Each glyph is defined by intersections of just two vertical and three horizontal grid lines. The constraint is analogous to seven-segment LED displays: a fixed set of possible positions forces each letterform to its most essential shape.
 
-This repository provides an [interactive page](https://dpt.github.io/SinclairLogo/) that parameterises that grid so you can explore and produce variants of the logo in real time.
+This repository provides an [interactive page](https://dpt.github.io/SinclairLogo/) that parameterises that grid - and the path taken around through it - so you can explore and produce variants of the logo in real time.
 
 ---
 
@@ -32,9 +32,9 @@ No build step. Open `index.html` directly in a browser.
 
 | Control | Effect |
 |---------|--------|
-| **Text** | The string to render. A–Z and space; case-insensitive. Unrecognised characters render as a crossed box. |
+| **Text** | The string to render. A–Z, 0–9, and space; case-insensitive. Unrecognised characters render as a crossed box. |
 | **Stroke width** | Thickness of each line segment. |
-| **Wide character width** | Horizontal span of standard-width glyphs (most letters). |
+| **Wide character width** | Horizontal span of standard-width glyphs (most letters and digits). |
 | **Very wide char width** | Horizontal span of double-wide glyphs (M and W only). |
 | **Spacing** | Gap between glyphs. |
 | **Bottom height** | Height of the lower zone, from baseline up to the mid-point. |
@@ -43,7 +43,8 @@ No build step. Open `index.html` directly in a browser.
 | **Ascender height** | How far ascenders extend above cap height. Affects B, H, L, T. Set to 0 to disable the ascender zone entirely. |
 | **Descender height** | How far descenders extend below the baseline. Affects G, J, P, Q, Y. Set to 0 to disable. |
 | **Scale** | Overall size multiplier. |
-| **Rounded** | Toggles between round and square stroke caps and joins. |
+| **Round corners** | Rounds path corners using quadratic curves; slide to control the degree. |
+| **Round strokes** | Toggles between round and square stroke caps and joins. |
 | **Grid** | Overlays the constraint grid: red vertical lines mark x-positions, blue horizontal lines mark y-positions. |
 | **Colours** | Selects a foreground/background colour scheme from ten ZX Spectrum palette combinations. |
 | **Reset** | Restores all controls to their defaults. |
@@ -58,18 +59,23 @@ No build step. Open `index.html` directly in a browser.
 
 **Extended glyphs** — invented to complete the alphabet within the same system:
 
-`B` `D` `E` `F` `H` `O` `T` `V` `Z`
+`B` `D` `E` `F` `H` `O` `T` `U` `V` `Z` `0` `1` `2` `3` `4` `5` `6` `7` `8` `9`
 
-**Descending glyphs** - utilise an additional row of the grid:
+**Descending glyphs** — utilise an additional row of the grid:
 
 `G` `J` `P` `Q` `Y`
 
-**Characters that bend the rules:**
+**Characters that bend the rules** — :
 
-- `K` - to avoid becoming an H we shift the top right stroke leftwards;
-- `M` and `W` - occupy two standard character widths;
+- `K` — to avoid becoming an H we shift the top right stroke leftwards;
+- `M` and `W` — occupy two standard character widths;
 - `V` — to distinguish V from U we introduce a diagonal;
-- `X` — we again resort to diagonals to create an X.
+- `X` — we again resort to diagonals to create an X;
+- `Z` - ditto.
+
+**Special:**
+
+- `` ` `` (Backtick) — renders a special secret logo.
 
 ---
 
@@ -82,7 +88,7 @@ Every glyph is drawn using canvas `lineTo` calls that snap to the intersections 
 | Position | Used by                                                    |
 |----------|------------------------------------------------------------|
 | `x[i]`   | Left edge — all glyphs                                     |
-| `x[i+1]` | Right edge — wide glyphs; Centre - double-wide glyphs only |
+| `x[i+1]` | Right edge — wide glyphs; Centre — double-wide glyphs only |
 | `x[i+2]` | Right edge — double-wide glyphs only (M, W)                |
 
 **Y-axis** — six horizontal levels, bottom to top:
@@ -97,3 +103,9 @@ Every glyph is drawn using canvas `lineTo` calls that snap to the intersections 
 | `y[5]` | Ascender top | Top of tall letters (B, H, L, T) |
 
 Enabling the **Grid** toggle draws all active x- and y-lines over the canvas, which makes the system immediately visible.
+
+---
+
+## Licence
+
+[Creative Commons Attribution-ShareAlike 4.0 International (CC BY-SA 4.0)](LICENSE)
