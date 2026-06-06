@@ -21,6 +21,7 @@ const gridToggle = document.getElementById("grid");
 const coloursSelect = document.getElementById("colours");
 const resetButton = document.getElementById("reset");
 const randomiseButton = document.getElementById("randomise");
+const exportSVGButton = document.getElementById("exportSVG");
 
 const allControls = document.querySelectorAll(
   ".controls input, .controls select, .controls textarea",
@@ -408,5 +409,175 @@ function draw() {
 
   ctx.restore();
 }
+
+function svgOpenSubpath(pts, rounding) {
+  let d = `M ${pts[0].px} ${pts[0].py}`;
+  for (let k = 1; k < pts.length; k++) {
+    const corner = pts[k];
+    const next = pts[k + 1];
+    if (next && rounding > 0) {
+      const arc = arcCorner(pts[k - 1], corner, next, rounding);
+      if (arc) {
+        d += ` L ${arc.m.px} ${arc.m.py} Q ${corner.px} ${corner.py} ${arc.n.px} ${arc.n.py}`;
+        continue;
+      }
+    }
+    d += ` L ${corner.px} ${corner.py}`;
+  }
+  return d;
+}
+
+function svgClosedSubpath(pts, rounding) {
+  const n = pts.length;
+  if (rounding === 0) {
+    let d = `M ${pts[0].px} ${pts[0].py}`;
+    for (let k = 1; k < n; k++) d += ` L ${pts[k].px} ${pts[k].py}`;
+    return d + " Z";
+  }
+  const arcs = pts.map((p, idx) =>
+    arcCorner(pts[(idx - 1 + n) % n], p, pts[(idx + 1) % n], rounding),
+  );
+  const a0 = arcs[0];
+  let d = `M ${a0 ? a0.n.px : pts[0].px} ${a0 ? a0.n.py : pts[0].py}`;
+  for (let k = 1; k < n; k++) {
+    const arc = arcs[k];
+    if (arc) {
+      d += ` L ${arc.m.px} ${arc.m.py} Q ${pts[k].px} ${pts[k].py} ${arc.n.px} ${arc.n.py}`;
+    } else {
+      d += ` L ${pts[k].px} ${pts[k].py}`;
+    }
+  }
+  if (a0) {
+    d += ` L ${a0.m.px} ${a0.m.py} Q ${pts[0].px} ${pts[0].py} ${a0.n.px} ${a0.n.py}`;
+  }
+  return d + " Z";
+}
+
+function buildSvgPath(path, x, y, i, sw, rounding, connect, diagonal) {
+  if (!path) return "";
+  const tokens = path.split(" ");
+  let pts = [];
+  let d = "";
+  let j = 0;
+
+  const flush = (closed) => {
+    if (pts.length) {
+      d += (closed ? svgClosedSubpath : svgOpenSubpath)(pts, rounding);
+      pts = [];
+    }
+  };
+
+  while (j < tokens.length) {
+    const cmd = tokens[j++];
+    if (cmd === "Z") { flush(true); continue; }
+    if (cmd === "M") flush(false);
+    const [xStr, yStr] = tokens[j++].split(",");
+    pts.push({
+      px: resolveCoord(xStr, x, y, i, sw, connect, diagonal),
+      py: resolveCoord(yStr, x, y, i, sw, connect, diagonal),
+    });
+  }
+  flush(false);
+  return d;
+}
+
+function exportSVG() {
+  const text = textInput.value;
+  const sw = strokeWidthSlider.value / 10;
+  const connect = (connectSlider.value / 10) * sw;
+  const diagonal = (diagonalSlider.value / 10) * sw;
+  const w0 = (8 * w0Slider.value) / 10;
+  const w1 = (8 * w1Slider.value) / 10;
+  const s = sSlider.value / 10;
+  const h0 = (2 * h0Slider.value) / 10;
+  const h1 = (2 * h1Slider.value) / 10;
+  const t = tSlider.value / 10;
+  const h2 = h2Slider.value / 10;
+  const h3 = h3Slider.value / 10;
+  const scale = scaleSlider.value;
+  const rounding = roundingSlider.value / 100;
+  const rounded = roundedToggle.checked;
+  const manic = manicToggle.checked;
+  const tile = tileToggle.checked;
+  const [fg, bg] = coloursSelect.value.split("|");
+
+  const y = [];
+  y[0] = -h3; y[1] = 0; y[2] = y[1] + h0; y[3] = y[2] + h1; y[4] = y[3] + t; y[5] = y[4] + h2;
+
+  const lineSpacing = y[5] - y[0] + s;
+  const lines = text.split("\n");
+  const lineLayouts = lines.map((line) => buildLayout(line, w0, w1, s));
+  const maxWidth = lineLayouts.reduce((m, l) => Math.max(m, l.width), 0);
+
+  const W = canvas.width;
+  const H = canvas.height;
+  const numLines = lines.length;
+  const offsetX = (W - maxWidth * scale) / 2;
+  const offsetY =
+    (H + (y[5] + y[0]) * scale - (numLines - 1) * lineSpacing * scale) / 2;
+
+  const lineCap = rounded ? "round" : "square";
+  const lineJoin = rounded ? "round" : "miter";
+
+  const parts = [];
+  parts.push(`<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}">`);
+  parts.push(`<rect width="${W}" height="${H}" fill="${bg}"/>`);
+  parts.push(
+    `<g transform="translate(${offsetX},${offsetY}) scale(${scale},${-scale})"` +
+    ` stroke-linecap="${lineCap}" stroke-linejoin="${lineJoin}" fill="none" stroke-width="${sw}">`,
+  );
+
+  if (tile) {
+    const xStep = maxWidth + s * 2;
+    const yStep = numLines * lineSpacing;
+    const nx = xStep > 0 ? Math.ceil(W / (xStep * scale)) + 1 : 0;
+    const ny = yStep > 0 ? Math.ceil(H / (yStep * scale)) + 1 : 0;
+    parts.push(`<g stroke="${fg}" opacity="0.1">`);
+    for (let gy = -ny; gy <= ny; gy++) {
+      for (let gx = -nx; gx <= nx; gx++) {
+        if (gx === 0 && gy === 0) continue;
+        lineLayouts.forEach(({ x, letters, width }, lineIdx) => {
+          const lineX = (maxWidth - width) / 2 + gx * xStep;
+          const lineY = -lineIdx * lineSpacing + gy * yStep;
+          letters.forEach(({ path, i }) => {
+            const d = buildSvgPath(path, x, y, i, sw, rounding, connect, diagonal);
+            if (d) parts.push(`<path transform="translate(${lineX},${lineY})" d="${d}"/>`);
+          });
+        });
+      }
+    }
+    parts.push("</g>");
+  }
+
+  let glyphIdx = 0;
+  lineLayouts.forEach(({ x, letters, width }, lineIdx) => {
+    const lineX = (maxWidth - width) / 2;
+    letters.forEach(({ path, i }) => {
+      const stroke = manic ? SPECTRUM_MANIC[glyphIdx % SPECTRUM_MANIC.length] : fg;
+      const manicTy = manic ? MANIC_SHIFTS[glyphIdx % MANIC_SHIFTS.length] * sw : 0;
+      const d = buildSvgPath(path, x, y, i, sw, rounding, connect, diagonal);
+      if (d) {
+        parts.push(
+          `<path transform="translate(${lineX},${-lineIdx * lineSpacing + manicTy})"` +
+          ` d="${d}" stroke="${stroke}"/>`,
+        );
+      }
+      glyphIdx++;
+    });
+  });
+
+  parts.push("</g>");
+  parts.push("</svg>");
+
+  const blob = new Blob([parts.join("\n")], { type: "image/svg+xml" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "sinclair.svg";
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+exportSVGButton.addEventListener("click", exportSVG);
 
 draw();
