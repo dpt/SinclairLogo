@@ -101,55 +101,55 @@ function arcCorner(prev, corner, next, rounding) {
 }
 
 // Open subpath: round all internal (non-endpoint) corners.
-function drawOpenSubpath(pts, rounding) {
-  ctx.moveTo(pts[0].px, pts[0].py);
+function drawOpenSubpath(dc, pts, rounding) {
+  dc.moveTo(pts[0].px, pts[0].py);
   for (let k = 1; k < pts.length; k++) {
     const corner = pts[k];
     const next = pts[k + 1];
     if (next && rounding > 0) {
       const arc = arcCorner(pts[k - 1], corner, next, rounding);
       if (arc) {
-        ctx.lineTo(arc.m.px, arc.m.py);
-        ctx.quadraticCurveTo(corner.px, corner.py, arc.n.px, arc.n.py);
+        dc.lineTo(arc.m.px, arc.m.py);
+        dc.quadraticCurveTo(corner.px, corner.py, arc.n.px, arc.n.py);
         continue;
       }
     }
-    ctx.lineTo(corner.px, corner.py);
+    dc.lineTo(corner.px, corner.py);
   }
 }
 
 // Closed subpath: round all corners including the wrap-around at the start point.
-// Begins the canvas path after the arc at pts[0] so the seam is invisible.
-function drawClosedSubpath(pts, rounding) {
+// Begins the path after the arc at pts[0] so the seam is invisible.
+function drawClosedSubpath(dc, pts, rounding) {
   const n = pts.length;
   if (rounding === 0) {
-    ctx.moveTo(pts[0].px, pts[0].py);
-    for (let k = 1; k < n; k++) ctx.lineTo(pts[k].px, pts[k].py);
-    ctx.closePath();
+    dc.moveTo(pts[0].px, pts[0].py);
+    for (let k = 1; k < n; k++) dc.lineTo(pts[k].px, pts[k].py);
+    dc.closePath();
     return;
   }
   const arcs = pts.map((p, idx) =>
     arcCorner(pts[(idx - 1 + n) % n], p, pts[(idx + 1) % n], rounding),
   );
   const a0 = arcs[0];
-  ctx.moveTo(a0 ? a0.n.px : pts[0].px, a0 ? a0.n.py : pts[0].py);
+  dc.moveTo(a0 ? a0.n.px : pts[0].px, a0 ? a0.n.py : pts[0].py);
   for (let k = 1; k < n; k++) {
     const arc = arcs[k];
     if (arc) {
-      ctx.lineTo(arc.m.px, arc.m.py);
-      ctx.quadraticCurveTo(pts[k].px, pts[k].py, arc.n.px, arc.n.py);
+      dc.lineTo(arc.m.px, arc.m.py);
+      dc.quadraticCurveTo(pts[k].px, pts[k].py, arc.n.px, arc.n.py);
     } else {
-      ctx.lineTo(pts[k].px, pts[k].py);
+      dc.lineTo(pts[k].px, pts[k].py);
     }
   }
   if (a0) {
-    ctx.lineTo(a0.m.px, a0.m.py);
-    ctx.quadraticCurveTo(pts[0].px, pts[0].py, a0.n.px, a0.n.py);
+    dc.lineTo(a0.m.px, a0.m.py);
+    dc.quadraticCurveTo(pts[0].px, pts[0].py, a0.n.px, a0.n.py);
   }
-  ctx.closePath();
+  dc.closePath();
 }
 
-function executePath(path, x, y, i, sw, rounding, connect, diagonal) {
+function executePath(dc, path, x, y, i, sw, rounding, connect, diagonal) {
   if (!path) return;
   const tokens = path.split(" ");
   let pts = [];
@@ -157,7 +157,7 @@ function executePath(path, x, y, i, sw, rounding, connect, diagonal) {
 
   const flush = (closed) => {
     if (pts.length) {
-      (closed ? drawClosedSubpath : drawOpenSubpath)(pts, rounding);
+      (closed ? drawClosedSubpath : drawOpenSubpath)(dc, pts, rounding);
       pts = [];
     }
   };
@@ -176,6 +176,17 @@ function executePath(path, x, y, i, sw, rounding, connect, diagonal) {
     });
   }
   flush(false);
+}
+
+function makeSvgDc() {
+  let d = "";
+  return {
+    moveTo(x, y) { d += ` M ${x} ${y}`; },
+    lineTo(x, y) { d += ` L ${x} ${y}`; },
+    quadraticCurveTo(cx, cy, x, y) { d += ` Q ${cx} ${cy} ${x} ${y}`; },
+    closePath() { d += " Z"; },
+    getPath() { return d.trimStart(); },
+  };
 }
 
 const SPECTRUM_MANIC = [
@@ -279,29 +290,30 @@ function buildLayout(text, w0, w1, spc) {
   return { x, letters, width: pos - 1 - spc };
 }
 
-function draw() {
-  // Configure
-  const text = textInput.value;
-  const sw = strokeWidthSlider.value / 10; // stroke width
-  const connect = (connectSlider.value / 10) * sw; // connect offset (0–2*sw)
-  const diagonal = (diagonalSlider.value / 10) * sw; // diagonal offset (0–2*sw)
-  const w0 = (8 * w0Slider.value) / 10; // char width
-  const w1 = (8 * w1Slider.value) / 10; // very wide char width
-  const s = sSlider.value / 10; // spacing
-  const h0 = (2 * h0Slider.value) / 10; // lower height
-  const h1 = (2 * h1Slider.value) / 10; // upper height
-  const t = tSlider.value / 10; // upper spacing
-  const h2 = h2Slider.value / 10; // ascender height
-  const h3 = h3Slider.value / 10; // descender height
-  const scale = scaleSlider.value; // overall scale
-  const rounding = roundingSlider.value / 100; // corner rounding factor (0–0.5)
+function getParams() {
+  const sw = strokeWidthSlider.value / 10;
+  const connect = (connectSlider.value / 10) * sw;
+  const diagonal = (diagonalSlider.value / 10) * sw;
+  const w0 = (8 * w0Slider.value) / 10;
+  const w1 = (8 * w1Slider.value) / 10;
+  const s = sSlider.value / 10;
+  const h0 = (2 * h0Slider.value) / 10;
+  const h1 = (2 * h1Slider.value) / 10;
+  const t = tSlider.value / 10;
+  const h2 = h2Slider.value / 10;
+  const h3 = h3Slider.value / 10;
+  const scale = scaleSlider.value;
+  const rounding = roundingSlider.value / 100;
   const rounded = roundedToggle.checked;
   const manic = manicToggle.checked;
   const tile = tileToggle.checked;
   const grid = gridToggle.checked;
   const [fg, bg] = coloursSelect.value.split("|");
+  const text = textInput.value;
+  return { text, sw, connect, diagonal, w0, w1, s, h0, h1, t, h2, h3, scale, rounding, rounded, manic, tile, grid, fg, bg };
+}
 
-  // Calculate y-levels (shared across all lines)
+function computeLayout({ text, w0, w1, s, h0, h1, t, h2, h3 }) {
   const y = [];
   y[0] = -h3;
   y[1] = 0;
@@ -309,19 +321,23 @@ function draw() {
   y[3] = y[2] + h1;
   y[4] = y[3] + t;
   y[5] = y[4] + h2;
-
   const lineSpacing = y[5] - y[0] + s;
   const lines = text.split("\n");
   const lineLayouts = lines.map((line) => buildLayout(line, w0, w1, s));
   const maxWidth = lineLayouts.reduce((m, l) => Math.max(m, l.width), 0);
+  return { y, lineSpacing, lines, lineLayouts, maxWidth };
+}
 
-  // Clear the background
+function draw() {
+  const p = getParams();
+  const { y, lineSpacing, lines, lineLayouts, maxWidth } = computeLayout(p);
+  const { sw, connect, diagonal, scale, rounding, rounded, manic, tile, grid, fg, bg } = p;
+
   ctx.fillStyle = bg;
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 
   ctx.save();
 
-  // Set overall transform
   const numLines = lines.length;
   const offsetX = (canvas.width - maxWidth * scale) / 2;
   const offsetY =
@@ -337,7 +353,7 @@ function draw() {
   ctx.lineJoin = rounded ? "round" : "miter";
 
   if (tile) {
-    const xStep = maxWidth + s * 2;
+    const xStep = maxWidth + p.s * 2;
     const yStep = numLines * lineSpacing;
     const nx = xStep > 0 ? Math.ceil(canvas.width / (xStep * scale)) + 1 : 0;
     const ny = yStep > 0 ? Math.ceil(canvas.height / (yStep * scale)) + 1 : 0;
@@ -353,7 +369,7 @@ function draw() {
           ctx.translate((maxWidth - width) / 2, -lineIdx * lineSpacing);
           letters.forEach(({ path, i }) => {
             ctx.beginPath();
-            executePath(path, x, y, i, sw, rounding, connect, diagonal);
+            executePath(ctx, path, x, y, i, sw, rounding, connect, diagonal);
             ctx.stroke();
           });
           ctx.restore();
@@ -398,7 +414,7 @@ function draw() {
       if (manic)
         ctx.translate(0, MANIC_SHIFTS[glyphIdx % MANIC_SHIFTS.length] * sw);
       ctx.beginPath();
-      executePath(path, x, y, i, sw, rounding, connect, diagonal);
+      executePath(ctx, path, x, y, i, sw, rounding, connect, diagonal);
       ctx.stroke();
       ctx.restore();
       glyphIdx++;
@@ -410,104 +426,10 @@ function draw() {
   ctx.restore();
 }
 
-function svgOpenSubpath(pts, rounding) {
-  let d = `M ${pts[0].px} ${pts[0].py}`;
-  for (let k = 1; k < pts.length; k++) {
-    const corner = pts[k];
-    const next = pts[k + 1];
-    if (next && rounding > 0) {
-      const arc = arcCorner(pts[k - 1], corner, next, rounding);
-      if (arc) {
-        d += ` L ${arc.m.px} ${arc.m.py} Q ${corner.px} ${corner.py} ${arc.n.px} ${arc.n.py}`;
-        continue;
-      }
-    }
-    d += ` L ${corner.px} ${corner.py}`;
-  }
-  return d;
-}
-
-function svgClosedSubpath(pts, rounding) {
-  const n = pts.length;
-  if (rounding === 0) {
-    let d = `M ${pts[0].px} ${pts[0].py}`;
-    for (let k = 1; k < n; k++) d += ` L ${pts[k].px} ${pts[k].py}`;
-    return d + " Z";
-  }
-  const arcs = pts.map((p, idx) =>
-    arcCorner(pts[(idx - 1 + n) % n], p, pts[(idx + 1) % n], rounding),
-  );
-  const a0 = arcs[0];
-  let d = `M ${a0 ? a0.n.px : pts[0].px} ${a0 ? a0.n.py : pts[0].py}`;
-  for (let k = 1; k < n; k++) {
-    const arc = arcs[k];
-    if (arc) {
-      d += ` L ${arc.m.px} ${arc.m.py} Q ${pts[k].px} ${pts[k].py} ${arc.n.px} ${arc.n.py}`;
-    } else {
-      d += ` L ${pts[k].px} ${pts[k].py}`;
-    }
-  }
-  if (a0) {
-    d += ` L ${a0.m.px} ${a0.m.py} Q ${pts[0].px} ${pts[0].py} ${a0.n.px} ${a0.n.py}`;
-  }
-  return d + " Z";
-}
-
-function buildSvgPath(path, x, y, i, sw, rounding, connect, diagonal) {
-  if (!path) return "";
-  const tokens = path.split(" ");
-  let pts = [];
-  let d = "";
-  let j = 0;
-
-  const flush = (closed) => {
-    if (pts.length) {
-      d += (closed ? svgClosedSubpath : svgOpenSubpath)(pts, rounding);
-      pts = [];
-    }
-  };
-
-  while (j < tokens.length) {
-    const cmd = tokens[j++];
-    if (cmd === "Z") { flush(true); continue; }
-    if (cmd === "M") flush(false);
-    const [xStr, yStr] = tokens[j++].split(",");
-    pts.push({
-      px: resolveCoord(xStr, x, y, i, sw, connect, diagonal),
-      py: resolveCoord(yStr, x, y, i, sw, connect, diagonal),
-    });
-  }
-  flush(false);
-  return d;
-}
-
 function exportSVG() {
-  const text = textInput.value;
-  const sw = strokeWidthSlider.value / 10;
-  const connect = (connectSlider.value / 10) * sw;
-  const diagonal = (diagonalSlider.value / 10) * sw;
-  const w0 = (8 * w0Slider.value) / 10;
-  const w1 = (8 * w1Slider.value) / 10;
-  const s = sSlider.value / 10;
-  const h0 = (2 * h0Slider.value) / 10;
-  const h1 = (2 * h1Slider.value) / 10;
-  const t = tSlider.value / 10;
-  const h2 = h2Slider.value / 10;
-  const h3 = h3Slider.value / 10;
-  const scale = scaleSlider.value;
-  const rounding = roundingSlider.value / 100;
-  const rounded = roundedToggle.checked;
-  const manic = manicToggle.checked;
-  const tile = tileToggle.checked;
-  const [fg, bg] = coloursSelect.value.split("|");
-
-  const y = [];
-  y[0] = -h3; y[1] = 0; y[2] = y[1] + h0; y[3] = y[2] + h1; y[4] = y[3] + t; y[5] = y[4] + h2;
-
-  const lineSpacing = y[5] - y[0] + s;
-  const lines = text.split("\n");
-  const lineLayouts = lines.map((line) => buildLayout(line, w0, w1, s));
-  const maxWidth = lineLayouts.reduce((m, l) => Math.max(m, l.width), 0);
+  const p = getParams();
+  const { y, lineSpacing, lines, lineLayouts, maxWidth } = computeLayout(p);
+  const { sw, connect, diagonal, scale, rounding, rounded, manic, tile, fg, bg } = p;
 
   const W = canvas.width;
   const H = canvas.height;
@@ -528,7 +450,7 @@ function exportSVG() {
   );
 
   if (tile) {
-    const xStep = maxWidth + s * 2;
+    const xStep = maxWidth + p.s * 2;
     const yStep = numLines * lineSpacing;
     const nx = xStep > 0 ? Math.ceil(W / (xStep * scale)) + 1 : 0;
     const ny = yStep > 0 ? Math.ceil(H / (yStep * scale)) + 1 : 0;
@@ -540,7 +462,9 @@ function exportSVG() {
           const lineX = (maxWidth - width) / 2 + gx * xStep;
           const lineY = -lineIdx * lineSpacing + gy * yStep;
           letters.forEach(({ path, i }) => {
-            const d = buildSvgPath(path, x, y, i, sw, rounding, connect, diagonal);
+            const dc = makeSvgDc();
+            executePath(dc, path, x, y, i, sw, rounding, connect, diagonal);
+            const d = dc.getPath();
             if (d) parts.push(`<path transform="translate(${lineX},${lineY})" d="${d}"/>`);
           });
         });
@@ -555,7 +479,9 @@ function exportSVG() {
     letters.forEach(({ path, i }) => {
       const stroke = manic ? SPECTRUM_MANIC[glyphIdx % SPECTRUM_MANIC.length] : fg;
       const manicTy = manic ? MANIC_SHIFTS[glyphIdx % MANIC_SHIFTS.length] * sw : 0;
-      const d = buildSvgPath(path, x, y, i, sw, rounding, connect, diagonal);
+      const dc = makeSvgDc();
+      executePath(dc, path, x, y, i, sw, rounding, connect, diagonal);
+      const d = dc.getPath();
       if (d) {
         parts.push(
           `<path transform="translate(${lineX},${-lineIdx * lineSpacing + manicTy})"` +
