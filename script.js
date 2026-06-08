@@ -15,7 +15,6 @@ const h3Slider = document.getElementById("h3");
 const scaleSlider = document.getElementById("scale");
 const roundingSlider = document.getElementById("rounding");
 const roundedToggle = document.getElementById("rounded");
-const manicToggle = document.getElementById("manic");
 const tileToggle = document.getElementById("tile");
 const gridToggle = document.getElementById("grid");
 const coloursSelect = document.getElementById("colours");
@@ -54,7 +53,8 @@ randomiseButton.addEventListener("click", () => {
     } else if (el.tagName === "SELECT") {
       el.selectedIndex = Math.floor(Math.random() * el.options.length);
     } else if (el.type === "range") {
-      const min = +el.min, max = +el.max;
+      const min = +el.min,
+        max = +el.max;
       el.value = Math.floor(Math.random() * (max - min + 1)) + min;
     }
   });
@@ -181,11 +181,21 @@ function executePath(dc, path, x, y, i, sw, rounding, connect, diagonal) {
 function makeSvgDc() {
   let d = "";
   return {
-    moveTo(x, y) { d += ` M ${x} ${y}`; },
-    lineTo(x, y) { d += ` L ${x} ${y}`; },
-    quadraticCurveTo(cx, cy, x, y) { d += ` Q ${cx} ${cy} ${x} ${y}`; },
-    closePath() { d += " Z"; },
-    getPath() { return d.trimStart(); },
+    moveTo(x, y) {
+      d += ` M ${x} ${y}`;
+    },
+    lineTo(x, y) {
+      d += ` L ${x} ${y}`;
+    },
+    quadraticCurveTo(cx, cy, x, y) {
+      d += ` Q ${cx} ${cy} ${x} ${y}`;
+    },
+    closePath() {
+      d += " Z";
+    },
+    getPath() {
+      return d.trimStart();
+    },
   };
 }
 
@@ -305,12 +315,33 @@ function getParams() {
   const scale = scaleSlider.value;
   const rounding = roundingSlider.value / 100;
   const rounded = roundedToggle.checked;
-  const manic = manicToggle.checked;
   const tile = tileToggle.checked;
   const grid = gridToggle.checked;
   const [fg, bg] = coloursSelect.value.split("|");
+  const manic = fg === "manic";
   const text = textInput.value;
-  return { text, sw, connect, diagonal, w0, w1, s, h0, h1, t, h2, h3, scale, rounding, rounded, manic, tile, grid, fg, bg };
+  return {
+    text,
+    sw,
+    connect,
+    diagonal,
+    w0,
+    w1,
+    s,
+    h0,
+    h1,
+    t,
+    h2,
+    h3,
+    scale,
+    rounding,
+    rounded,
+    manic,
+    tile,
+    grid,
+    fg,
+    bg,
+  };
 }
 
 function computeLayout({ text, w0, w1, s, h0, h1, t, h2, h3 }) {
@@ -331,7 +362,19 @@ function computeLayout({ text, w0, w1, s, h0, h1, t, h2, h3 }) {
 function draw() {
   const p = getParams();
   const { y, lineSpacing, lines, lineLayouts, maxWidth } = computeLayout(p);
-  const { sw, connect, diagonal, scale, rounding, rounded, manic, tile, grid, fg, bg } = p;
+  const {
+    sw,
+    connect,
+    diagonal,
+    scale,
+    rounding,
+    rounded,
+    manic,
+    tile,
+    grid,
+    fg,
+    bg,
+  } = p;
 
   ctx.fillStyle = bg;
   ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -429,7 +472,18 @@ function draw() {
 function exportSVG() {
   const p = getParams();
   const { y, lineSpacing, lines, lineLayouts, maxWidth } = computeLayout(p);
-  const { sw, connect, diagonal, scale, rounding, rounded, manic, tile, fg, bg } = p;
+  const {
+    sw,
+    connect,
+    diagonal,
+    scale,
+    rounding,
+    rounded,
+    manic,
+    tile,
+    fg,
+    bg,
+  } = p;
 
   const W = canvas.width;
   const H = canvas.height;
@@ -442,11 +496,13 @@ function exportSVG() {
   const lineJoin = rounded ? "round" : "miter";
 
   const parts = [];
-  parts.push(`<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}">`);
+  parts.push(
+    `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}">`,
+  );
   parts.push(`<rect width="${W}" height="${H}" fill="${bg}"/>`);
   parts.push(
     `<g transform="translate(${offsetX},${offsetY}) scale(${scale},${-scale})"` +
-    ` stroke-linecap="${lineCap}" stroke-linejoin="${lineJoin}" fill="none" stroke-width="${sw}">`,
+      ` stroke-linecap="${lineCap}" stroke-linejoin="${lineJoin}" fill="none" stroke-width="${sw}">`,
   );
 
   if (tile) {
@@ -465,7 +521,10 @@ function exportSVG() {
             const dc = makeSvgDc();
             executePath(dc, path, x, y, i, sw, rounding, connect, diagonal);
             const d = dc.getPath();
-            if (d) parts.push(`<path transform="translate(${lineX},${lineY})" d="${d}"/>`);
+            if (d)
+              parts.push(
+                `<path transform="translate(${lineX},${lineY})" d="${d}"/>`,
+              );
           });
         });
       }
@@ -477,15 +536,19 @@ function exportSVG() {
   lineLayouts.forEach(({ x, letters, width }, lineIdx) => {
     const lineX = (maxWidth - width) / 2;
     letters.forEach(({ path, i }) => {
-      const stroke = manic ? SPECTRUM_MANIC[glyphIdx % SPECTRUM_MANIC.length] : fg;
-      const manicTy = manic ? MANIC_SHIFTS[glyphIdx % MANIC_SHIFTS.length] * sw : 0;
+      const stroke = manic
+        ? SPECTRUM_MANIC[glyphIdx % SPECTRUM_MANIC.length]
+        : fg;
+      const manicTy = manic
+        ? MANIC_SHIFTS[glyphIdx % MANIC_SHIFTS.length] * sw
+        : 0;
       const dc = makeSvgDc();
       executePath(dc, path, x, y, i, sw, rounding, connect, diagonal);
       const d = dc.getPath();
       if (d) {
         parts.push(
           `<path transform="translate(${lineX},${-lineIdx * lineSpacing + manicTy})"` +
-          ` d="${d}" stroke="${stroke}"/>`,
+            ` d="${d}" stroke="${stroke}"/>`,
         );
       }
       glyphIdx++;

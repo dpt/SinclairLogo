@@ -220,10 +220,6 @@
         </div>
         <hr>
         <div class="control">
-            <label for="manic">Manic Mode:</label>
-            <input type="checkbox" id="manic" name="manic" title="Renders each glyph in a different ZX Spectrum colour (red → yellow → green → cyan → blue → magenta) and shifts glyphs up and down.">
-        </div>
-        <div class="control">
             <label for="tile">Tile:</label>
             <input type="checkbox" id="tile" name="tile" title="Renders lighter copies of the text in a grid around the main text, like wallpaper.">
         </div>
@@ -233,7 +229,7 @@
         </div>
         <div class="control">
             <label for="colours">Colours:</label>
-            <select id="colours" name="colours" title="Selects a foreground/background colour scheme from ten ZX Spectrum palette combinations.">
+            <select id="colours" name="colours" title="Selects a foreground/background colour scheme, or Manic mode which cycles each glyph through ZX Spectrum colours and shifts them up and down.">
                 <option value="#000000|#FFFFFF">Black on White</option>
                 <option value="#FFFFFF|#000000">White on Black</option>
                 <option value="#0000FF|#FFFF00">Blue on Yellow</option>
@@ -244,6 +240,7 @@
                 <option value="#000000|#00FF00">Black on Green</option>
                 <option value="#FF0000|#FFFFFF">Red on White</option>
                 <option value="#FFFFFF|#FF0000">White on Red</option>
+                <option value="manic|#000000">Manic</option>
             </select>
         </div>
     </div>

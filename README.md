@@ -47,9 +47,8 @@ No build step. Open `index.html` directly in a browser.
 | **Scale** | Overall size multiplier. |
 | **Round corners** | Rounds path corners using quadratic curves; slide to control the degree. |
 | **Round strokes** | Toggles between round and square stroke caps and joins. |
-| **Manic Mode** | Renders each glyph in a different ZX Spectrum colour (red → yellow → green → cyan → blue → magenta) and shifts glyphs up and down. Overrides the foreground colour. |
 | **Grid** | Overlays the constraint grid: red vertical lines mark x-positions, blue horizontal lines mark y-positions. |
-| **Colours** | Selects a foreground/background colour scheme from ten ZX Spectrum palette combinations. |
+| **Colours** | Selects a foreground/background colour scheme from ten ZX Spectrum palette combinations, or **Manic** — which cycles each glyph through ZX Spectrum colours (red → yellow → green → cyan → blue → magenta) and shifts glyphs up and down. |
 | **Reset** | Restores all controls to their defaults. |
 
 ---
@@ -68,7 +67,7 @@ No build step. Open `index.html` directly in a browser.
 
 `G` `J` `P` `Q` `Y`
 
-**Characters that bend the rules** — :
+**Characters that bend the rules:**
 
 - `K` — to avoid becoming an H we shift the top right stroke leftwards;
 - `M` and `W` — occupy two standard character widths;
