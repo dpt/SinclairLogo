@@ -272,6 +272,8 @@ const drawFns = {
     path: "M X1,Y1 L X0,Y1 L X0,Y1+D L X1,Y3-D L X1,Y3 L X0,Y3",
     width: 1,
   },
+  ".": { path: "M X0,Y1 L X0,Y1", width: 0 },
+  "|": { path: "M X0,Y1 L X0,Y3", width: 0 },
   "-": { path: "M X0,Y2 L X1,Y2", width: 1 },
   "`": {
     path: "M X0+3.0s,Y0 L X1,Y0 M X0+0.6s,Y1 L X1-0.6s,Y1 M X0+0.4s,Y2 L X1-0.4s,Y2 M X0+1.1s,Y3 L X1-1.1s,Y3 M X0+2.2s,Y4 L X1-2.2s,Y4",
