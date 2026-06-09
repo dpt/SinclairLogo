@@ -28,6 +28,62 @@ const allControls = document.querySelectorAll(
 
 allControls.forEach((el) => el.addEventListener("input", draw));
 
+let mouseX = canvas.width / 2;
+let mouseY = canvas.height / 2;
+
+let isDragging = false;
+let dragStartX, dragStartStroke;
+
+let dragStartY, dragStartRounding;
+
+canvas.addEventListener("mousedown", (e) => {
+  isDragging = true;
+  dragStartX = e.offsetX;
+  dragStartStroke = +strokeWidthSlider.value;
+  dragStartY = e.offsetY;
+  dragStartRounding = +roundingSlider.value;
+});
+
+document.addEventListener("mouseup", () => {
+  isDragging = false;
+});
+
+canvas.addEventListener("mousemove", (e) => {
+  if (isDragging) {
+    const dx = Math.round((e.offsetX - dragStartX) / 5);
+    strokeWidthSlider.value = Math.max(
+      +strokeWidthSlider.min,
+      Math.min(+strokeWidthSlider.max, dragStartStroke + dx),
+    );
+    const dy = Math.round((dragStartY - e.offsetY) / 5);
+    roundingSlider.value = Math.max(
+      +roundingSlider.min,
+      Math.min(+roundingSlider.max, dragStartRounding + dy),
+    );
+  } else {
+    mouseX = e.offsetX;
+    mouseY = e.offsetY;
+  }
+  draw();
+});
+
+canvas.addEventListener("mouseleave", () => {
+  if (!isDragging) {
+    mouseX = canvas.width / 2;
+    mouseY = canvas.height / 2;
+    draw();
+  }
+});
+
+canvas.addEventListener("wheel", (e) => {
+  e.preventDefault();
+  scaleSlider.value = Math.max(
+    +scaleSlider.min,
+    Math.min(+scaleSlider.max, +scaleSlider.value - Math.sign(e.deltaY)),
+  );
+  draw();
+}, { passive: false });
+
 resetButton.addEventListener("click", () => {
   allControls.forEach((el) => {
     if (el.type === "checkbox") {
@@ -390,12 +446,10 @@ function draw() {
   ctx.save();
 
   const numLines = lines.length;
-  const offsetX = (canvas.width - maxWidth * scale) / 2;
+  const offsetX = mouseX - (maxWidth * scale) / 2;
   const offsetY =
-    (canvas.height +
-      (y[5] + y[0]) * scale -
-      (numLines - 1) * lineSpacing * scale) /
-    2;
+    mouseY +
+    ((y[5] + y[0]) * scale - (numLines - 1) * lineSpacing * scale) / 2;
   ctx.translate(offsetX, offsetY);
   ctx.scale(scale, -scale);
 
