@@ -51,10 +51,15 @@
             min-width: 240px;
         }
 
-        .controls hr {
-            border: none;
+        .section-heading {
+            margin: 0.125rem 0 0;
+            padding: 0.25rem 0 0;
+            font-size: 0.6875rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: #aaa;
             border-top: 1px solid #ebebeb;
-            margin: 0.125rem 0;
         }
 
         .control {
@@ -110,7 +115,7 @@
             display: flex;
             flex-direction: column;
             gap: 0.5rem;
-            align-items: flex-start;
+            align-items: center;
         }
 
         .canvas-buttons {
@@ -140,9 +145,32 @@
         .canvas-buttons button:hover {
             background: #f5f5f5;
         }
+
+        .github-ribbon {
+            position: fixed;
+            top: 30px;
+            right: -40px;
+            width: 175px;
+            padding: 8px 0;
+            background: #777;
+            color: #fff;
+            font-size: 0.75rem;
+            font-weight: bolder;
+            text-align: center;
+            text-decoration: none;
+            letter-spacing: 0.03em;
+            transform: rotate(45deg);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.25);
+            z-index: 100;
+        }
+
+        .github-ribbon:hover {
+            background: #111;
+        }
     </style>
 </head>
 <body>
+<a class="github-ribbon" href="https://github.com/dpt/SinclairLogo">View on GitHub</a>
 <h1>Sinclair-O-Matic</h1>
 <h2>A typographical exploration.</h2>
 <div class="layout">
@@ -159,7 +187,7 @@
             <label for="text">Text:</label>
             <textarea id="text" name="text" rows="3" title="The string to render. A–Z, 0–9, and space; case-insensitive. Unrecognised characters render as a crossed box. Use newlines to render multiple lines.">SINCLAIR</textarea>
         </div>
-        <hr>
+        <p class="section-heading">Horizontal</p>
         <div class="control">
             <label for="w0">Wide character width:</label>
             <input type="range" id="w0" name="w0" min="2" max="20" value="10" title="Horizontal span of standard-width glyphs (most letters and digits).">
@@ -172,31 +200,28 @@
             <label for="s">Spacing:</label>
             <input type="range" id="s" name="s" min="1" max="40" value="10" title="Gap between glyphs.">
         </div>
+        <p class="section-heading">Vertical</p>
         <div class="control">
-            <label for="h0">Bottom height:</label>
-            <input type="range" id="h0" name="h0" min="1" max="40" value="10" title="Height of the lower zone, from baseline up to the mid-point.">
-        </div>
-        <div class="control">
-            <label for="h1">Upper height:</label>
-            <input type="range" id="h1" name="h1" min="1" max="40" value="10" title="Height of the upper zone, from mid-point up to cap height.">
+            <label for="h2">Ascender height:</label>
+            <input type="range" id="h2" name="h2" min="0" max="39" value="0" title="How far ascenders extend above cap height. Affects B, H, L, T. Set to 0 to disable the ascender zone entirely.">
         </div>
         <div class="control">
             <label for="t">Upper spacing:</label>
             <input type="range" id="t" name="t" min="1" max="40" value="20" title="Gap between cap height and the ascender zone.">
         </div>
         <div class="control">
-            <label for="h2">Ascender height:</label>
-            <input type="range" id="h2" name="h2" min="0" max="39" value="0" title="How far ascenders extend above cap height. Affects B, H, L, T. Set to 0 to disable the ascender zone entirely.">
+            <label for="h1">Upper height:</label>
+            <input type="range" id="h1" name="h1" min="1" max="40" value="10" title="Height of the upper zone, from mid-point up to cap height.">
+        </div>
+        <div class="control">
+            <label for="h0">Bottom height:</label>
+            <input type="range" id="h0" name="h0" min="1" max="40" value="10" title="Height of the lower zone, from baseline up to the mid-point.">
         </div>
         <div class="control">
             <label for="h3">Descender height:</label>
             <input type="range" id="h3" name="h3" min="0" max="39" value="20" title="How far descenders extend below the baseline. Affects G, J, P, Q, Y. Set to 0 to disable.">
         </div>
-        <div class="control">
-            <label for="scale">Scale:</label>
-            <input type="range" id="scale" name="scale" min="1" max="40" value="12" title="Overall size multiplier.">
-        </div>
-        <hr>
+        <p class="section-heading">Offsets</p>
         <div class="control">
             <label for="connect">Connect:</label>
             <input type="range" id="connect" name="connect" min="0" max="20" value="5" title="Size of the internal offset used where glyphs connect back to themselves, as a fraction of stroke width. Ranges from 0 to 2× stroke width; default is 0.5×.">
@@ -205,7 +230,7 @@
             <label for="diagonal">Diagonal:</label>
             <input type="range" id="diagonal" name="diagonal" min="0" max="20" value="5" title="Size of the diagonal offset used in V, X, and Z, as a fraction of stroke width. Ranges from 0 to 2× stroke width; default is 0.5×.">
         </div>
-        <hr>
+        <p class="section-heading">Stroke</p>
         <div class="control">
             <label for="strokeWidth">Stroke width:</label>
             <input type="range" id="strokeWidth" name="strokeWidth" min="1" max="20" value="14" title="Thickness of each line segment.">
@@ -218,7 +243,11 @@
             <label for="rounded">Round strokes:</label>
             <input type="checkbox" id="rounded" name="rounded" title="Toggles between round and square stroke caps and joins.">
         </div>
-        <hr>
+        <p class="section-heading">Display</p>
+        <div class="control">
+            <label for="scale">Scale:</label>
+            <input type="range" id="scale" name="scale" min="1" max="40" value="12" title="Overall size multiplier.">
+        </div>
         <div class="control">
             <label for="tile">Tile:</label>
             <input type="checkbox" id="tile" name="tile" title="Renders lighter copies of the text in a grid around the main text, like wallpaper.">
@@ -245,7 +274,6 @@
         </div>
     </div>
 </div>
-<p><a href="https://github.com/dpt/SinclairLogo">View source on GitHub</a></p>
 <script src="script.js"></script>
 </body>
 </html>

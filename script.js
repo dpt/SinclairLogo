@@ -48,6 +48,7 @@ randomiseButton.addEventListener("click", () => {
   allControls.forEach((el) => {
     if (el.tagName === "TEXTAREA") return;
     if (el.id === "grid" || el.id === "scale") return;
+    if (el.id === "h0" || el.id === "h1") return;
     if (el.type === "checkbox") {
       el.checked = Math.random() < 0.3;
     } else if (el.tagName === "SELECT") {
@@ -58,6 +59,11 @@ randomiseButton.addEventListener("click", () => {
       el.value = Math.floor(Math.random() * (max - min + 1)) + min;
     }
   });
+  const totalHeight = Math.floor(Math.random() * 79) + 2;
+  const h0Min = Math.max(1, totalHeight - 40);
+  const h0Max = Math.min(40, totalHeight - 1);
+  h0Slider.value = Math.floor(Math.random() * (h0Max - h0Min + 1)) + h0Min;
+  h1Slider.value = totalHeight - h0Slider.value;
   draw();
 });
 
