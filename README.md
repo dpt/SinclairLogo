@@ -30,26 +30,70 @@ No build step. Open `index.html` directly in a browser.
 
 ## Controls
 
+**Text** — the string to render. A–Z, 0–9, space, and punctuation; case-insensitive. Unrecognised characters render as a crossed box. Use newlines for multiple lines.
+
+### Horizontal
+
 | Control | Effect |
 |---------|--------|
-| **Text** | The string to render. A–Z, 0–9, and space; case-insensitive. Unrecognised characters render as a crossed box. |
-| **Stroke width** | Thickness of each line segment. |
-| **Connect** | Size of the internal offset used where glyphs connect back to themselves, as a fraction of stroke width. Ranges from 0 to 2× stroke width; default is 0.5×. |
-| **Diagonal** | Size of the diagonal offset used in V, X, and Z, as a fraction of stroke width. Ranges from 0 to 2× stroke width; default is 0.5×. |
 | **Wide character width** | Horizontal span of standard-width glyphs (most letters and digits). |
-| **Very wide char width** | Horizontal span of double-wide glyphs (M and W only). |
-| **Spacing** | Gap between glyphs. |
-| **Bottom height** | Height of the lower zone, from baseline up to the mid-point. |
-| **Upper height** | Height of the upper zone, from mid-point up to cap height. |
+| **Very wide char factor** | Width of double-wide glyphs (M and W) as a percentage of the base character width. |
+| **Spacing** | Gap between glyphs (and between lines). |
+
+### Vertical
+
+| Control | Effect |
+|---------|--------|
+| **Ascender height** | How far ascenders extend above cap height. Affects B, D, H, K, L, T. Set to 0 to disable the ascender zone entirely. |
 | **Upper spacing** | Gap between cap height and the ascender zone. |
-| **Ascender height** | How far ascenders extend above cap height. Affects B, H, L, T. Set to 0 to disable the ascender zone entirely. |
+| **Upper height** | Height of the upper zone, from mid-point up to cap height. |
+| **Bottom height** | Height of the lower zone, from baseline up to the mid-point. |
 | **Descender height** | How far descenders extend below the baseline. Affects G, J, P, Q, Y. Set to 0 to disable. |
-| **Scale** | Overall size multiplier. |
+
+### Offsets
+
+| Control | Effect |
+|---------|--------|
+| **Connect** | Internal offset where glyphs connect back to themselves, as a fraction of stroke width. Ranges from 0 to 2× stroke width; default is 0.5×. |
+| **Diagonal** | Diagonal offset used in V, X, and Z, as a fraction of stroke width. Ranges from 0 to 2× stroke width; default is 0.5×. |
+
+### Stroke
+
+| Control | Effect |
+|---------|--------|
+| **Stroke width** | Thickness of each line segment. |
 | **Round corners** | Rounds path corners using quadratic curves; slide to control the degree. |
 | **Round strokes** | Toggles between round and square stroke caps and joins. |
+
+### Display
+
+| Control | Effect |
+|---------|--------|
+| **Scale** | Overall size multiplier. |
+| **Tile** | Renders lighter copies of the text tiled around the main text, like wallpaper. |
 | **Grid** | Overlays the constraint grid: red vertical lines mark x-positions, blue horizontal lines mark y-positions. |
 | **Colours** | Selects a foreground/background colour scheme from ten ZX Spectrum palette combinations, or **Manic** — which cycles each glyph through ZX Spectrum colours (red → yellow → green → cyan → blue → magenta) and shifts glyphs up and down. |
+
+### Buttons
+
+| Button | Effect |
+|--------|--------|
+| **Randomise parameters** | Randomises all controls to produce unexpected results. |
 | **Reset** | Restores all controls to their defaults. |
+| **Export SVG** | Downloads the current rendering as an SVG file. |
+
+---
+
+## Canvas interaction
+
+The canvas responds to the mouse without clicking any controls:
+
+| Gesture | Effect |
+|---------|--------|
+| **Hover** | Centres the text on the cursor position. |
+| **Drag left/right** | Adjusts stroke width. |
+| **Drag up/down** | Adjusts corner rounding. |
+| **Scroll wheel** | Adjusts scale. |
 
 ---
 
@@ -63,7 +107,7 @@ No build step. Open `index.html` directly in a browser.
 
 `B` `D` `E` `F` `H` `O` `T` `U` `V` `Z` `0` `1` `2` `3` `4` `5` `6` `7` `8` `9`
 
-**Descending glyphs** — utilise an additional row of the grid:
+**Descending glyphs** — reach below the baseline into the descender zone:
 
 `G` `J` `P` `Q` `Y`
 
@@ -73,7 +117,11 @@ No build step. Open `index.html` directly in a browser.
 - `M` and `W` — occupy two standard character widths;
 - `V` — to distinguish V from U we introduce a diagonal;
 - `X` — we again resort to diagonals to create an X;
-- `Z` - ditto.
+- `Z` — ditto.
+
+**Punctuation:**
+
+`!` (exclamation mark) `-` (hyphen) `.` (full stop) `|` (vertical bar)
 
 **Special:**
 
