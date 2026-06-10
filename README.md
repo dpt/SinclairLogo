@@ -42,7 +42,7 @@ No build step. Open `index.html` directly in a browser.
 | **Bottom height** | Height of the lower zone, from baseline up to the mid-point. |
 | **Upper height** | Height of the upper zone, from mid-point up to cap height. |
 | **Upper spacing** | Gap between cap height and the ascender zone. |
-| **Ascender height** | How far ascenders extend above cap height. Affects B, H, L, T. Set to 0 to disable the ascender zone entirely. |
+| **Ascender height** | How far ascenders extend above cap height. Affects B, D, H, K, L, T. Set to 0 to disable the ascender zone entirely. |
 | **Descender height** | How far descenders extend below the baseline. Affects G, J, P, Q, Y. Set to 0 to disable. |
 | **Scale** | Overall size multiplier. |
 | **Round corners** | Rounds path corners using quadratic curves; slide to control the degree. |
@@ -102,7 +102,7 @@ Every glyph is drawn using canvas `lineTo` calls that snap to the intersections 
 | `y[2]` | Mid-lower | Junction between lower and upper zones |
 | `y[3]` | Cap height | Top of regular capitals |
 | `y[4]` | Ascender gap | Space between cap height and ascender zone |
-| `y[5]` | Ascender top | Top of tall letters (B, H, L, T) |
+| `y[5]` | Ascender top | Top of tall letters (B, D, H, K, L, T) |
 
 Enabling the **Grid** toggle draws all active x- and y-lines over the canvas, which makes the system immediately visible.
 
