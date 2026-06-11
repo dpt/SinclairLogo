@@ -21,6 +21,9 @@ const coloursSelect = document.getElementById("colours");
 const resetButton = document.getElementById("reset");
 const randomiseButton = document.getElementById("randomise");
 const exportSVGButton = document.getElementById("exportSVG");
+const exportJSONButton = document.getElementById("exportJSON");
+const importJSONButton = document.getElementById("importJSON");
+const importFileInput = document.getElementById("importFile");
 
 const allControls = document.querySelectorAll(
   ".controls input, .controls select, .controls textarea",
@@ -631,4 +634,60 @@ function exportSVG() {
 
 exportSVGButton.addEventListener("click", exportSVG);
 
+function exportJSON() {
+  const settings = {};
+  allControls.forEach((el) => {
+    if (el.type === "checkbox") {
+      settings[el.id] = el.checked;
+    } else {
+      settings[el.id] = el.value;
+    }
+  });
+  const blob = new Blob([JSON.stringify(settings, null, 2)], {
+    type: "application/json",
+  });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "sinclair-settings.json";
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+exportJSONButton.addEventListener("click", exportJSON);
+
+importJSONButton.addEventListener("click", () => {
+  importFileInput.click();
+});
+
+importFileInput.addEventListener("change", (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = (event) => {
+    try {
+      const settings = JSON.parse(event.target.result);
+      if (typeof settings !== "object" || settings === null) {
+        throw new Error("Invalid format. Settings file must be a JSON object.");
+      }
+      allControls.forEach((el) => {
+        if (settings[el.id] !== undefined) {
+          if (el.type === "checkbox") {
+            el.checked = !!settings[el.id];
+          } else {
+            el.value = settings[el.id];
+          }
+        }
+      });
+      draw();
+    } catch (err) {
+      alert("Error importing settings: " + err.message);
+    }
+    importFileInput.value = "";
+  };
+  reader.readAsText(file);
+});
+
 draw();
+
