@@ -197,8 +197,8 @@
             <input type="range" id="w0" name="w0" min="2" max="20" value="10" title="Horizontal span of standard-width glyphs (most letters and digits).">
         </div>
         <div class="control">
-            <label for="w1">Very wide char width:</label>
-            <input type="range" id="w1" name="w1" min="1" max="60" value="8" title="Horizontal span of double-wide glyphs (M and W only).">
+            <label for="w1">Very wide char factor:</label>
+            <input type="range" id="w1" name="w1" min="50" max="100" value="80" title="Width of double-wide glyphs (M and W) as a percentage of the base character width. 100% matches the base width; 200% doubles it.">
         </div>
         <div class="control">
             <label for="s">Spacing:</label>
@@ -207,7 +207,7 @@
         <p class="section-heading">Vertical</p>
         <div class="control">
             <label for="h2">Ascender height:</label>
-            <input type="range" id="h2" name="h2" min="0" max="39" value="0" title="How far ascenders extend above cap height. Affects B, H, L, T. Set to 0 to disable the ascender zone entirely.">
+            <input type="range" id="h2" name="h2" min="0" max="39" value="0" title="How far ascenders extend above cap height. Affects B, D, H, K, L, T. Set to 0 to disable the ascender zone entirely.">
         </div>
         <div class="control">
             <label for="t">Upper spacing:</label>

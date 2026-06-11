@@ -369,7 +369,7 @@ function getParams() {
   const connect = (connectSlider.value / 10) * sw;
   const diagonal = (diagonalSlider.value / 10) * sw;
   const w0 = (8 * w0Slider.value) / 10;
-  const w1 = (8 * w1Slider.value) / 10;
+  const w1 = w0 * (w1Slider.value / 100);
   const s = sSlider.value / 10;
   const h0 = (2 * h0Slider.value) / 10;
   const h1 = (2 * h1Slider.value) / 10;
