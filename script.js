@@ -24,6 +24,8 @@ const exportSVGButton = document.getElementById("exportSVG");
 const exportJSONButton = document.getElementById("exportJSON");
 const importJSONButton = document.getElementById("importJSON");
 const importFileInput = document.getElementById("importFile");
+const statusMessage = document.getElementById("statusMessage");
+
 
 const allControls = document.querySelectorAll(
   ".controls input, .controls select, .controls textarea",
@@ -634,7 +636,20 @@ function exportSVG() {
 
 exportSVGButton.addEventListener("click", exportSVG);
 
-function exportJSON() {
+let statusTimeout;
+
+function showStatus(message, isError = false) {
+  clearTimeout(statusTimeout);
+  statusMessage.textContent = message;
+  statusMessage.className = `status-message ${isError ? "error" : "success"}`;
+  
+  statusTimeout = setTimeout(() => {
+    statusMessage.style.display = "none";
+    statusMessage.className = "status-message";
+  }, 5000);
+}
+
+function getSettingsFromControls() {
   const settings = {};
   allControls.forEach((el) => {
     if (el.type === "checkbox") {
@@ -643,6 +658,46 @@ function exportJSON() {
       settings[el.id] = el.value;
     }
   });
+  return settings;
+}
+
+function applySettingsToControls(settings) {
+  allControls.forEach((el) => {
+    if (settings[el.id] !== undefined) {
+      if (el.type === "checkbox") {
+        el.checked = !!settings[el.id];
+      } else {
+        el.value = settings[el.id];
+      }
+    }
+  });
+}
+
+function validateAndSanitizeSettings(settings) {
+  if (typeof settings !== "object" || settings === null) {
+    throw new Error("Invalid format. Settings file must be a JSON object.");
+  }
+
+  const validControlIds = new Set(Array.from(allControls).map(el => el.id));
+  const sanitized = {};
+  let hasValidKeys = false;
+
+  for (const key of Object.keys(settings)) {
+    if (validControlIds.has(key)) {
+      sanitized[key] = settings[key];
+      hasValidKeys = true;
+    }
+  }
+
+  if (!hasValidKeys) {
+    throw new Error("Settings file contains no valid control parameters.");
+  }
+
+  return sanitized;
+}
+
+function exportJSON() {
+  const settings = getSettingsFromControls();
   const blob = new Blob([JSON.stringify(settings, null, 2)], {
     type: "application/json",
   });
@@ -652,6 +707,7 @@ function exportJSON() {
   a.download = "sinclair-settings.json";
   a.click();
   URL.revokeObjectURL(url);
+  showStatus("Settings exported successfully!");
 }
 
 exportJSONButton.addEventListener("click", exportJSON);
@@ -667,22 +723,14 @@ importFileInput.addEventListener("change", (e) => {
   const reader = new FileReader();
   reader.onload = (event) => {
     try {
-      const settings = JSON.parse(event.target.result);
-      if (typeof settings !== "object" || settings === null) {
-        throw new Error("Invalid format. Settings file must be a JSON object.");
-      }
-      allControls.forEach((el) => {
-        if (settings[el.id] !== undefined) {
-          if (el.type === "checkbox") {
-            el.checked = !!settings[el.id];
-          } else {
-            el.value = settings[el.id];
-          }
-        }
-      });
+      const rawSettings = JSON.parse(event.target.result);
+      const sanitizedSettings = validateAndSanitizeSettings(rawSettings);
+      
+      applySettingsToControls(sanitizedSettings);
       draw();
+      showStatus("Settings imported successfully!");
     } catch (err) {
-      alert("Error importing settings: " + err.message);
+      showStatus("Import failed: " + err.message, true);
     }
     importFileInput.value = "";
   };
