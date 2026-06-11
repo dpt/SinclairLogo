@@ -171,6 +171,31 @@
         .github-ribbon:hover {
             background: #111;
         }
+
+        .status-message {
+            font-size: 0.75rem;
+            padding: 0.5rem;
+            border-radius: 4px;
+            border: 1px solid transparent;
+            display: none;
+            margin-top: 0.5rem;
+            text-align: center;
+            font-weight: 500;
+        }
+
+        .status-message.error {
+            display: block;
+            background-color: #fde8e8;
+            color: #9b1c1c;
+            border-color: #f8b4b4;
+        }
+
+        .status-message.success {
+            display: block;
+            background-color: #edfdfd;
+            color: #0369a1;
+            border-color: #bae6fd;
+        }
     </style>
 </head>
 <body>
@@ -184,6 +209,9 @@
             <button id="randomise" title="Randomises all controls to produce unexpected results."><span class="icon">⚄</span>Randomise parameters</button>
             <button id="reset" title="Restores all controls to their defaults."><span class="icon">↺</span>Reset</button>
             <button id="exportSVG" title="Downloads the current rendering as an SVG file."><span class="icon">↓</span>Export SVG</button>
+            <button id="exportJSON" title="Downloads the current settings as a JSON file."><span class="icon">↓</span>Export JSON</button>
+            <button id="importJSON" title="Uploads and restores settings from a JSON file."><span class="icon">↑</span>Import JSON</button>
+            <input type="file" id="importFile" accept=".json" style="display: none;">
         </div>
     </div>
     <div class="controls">
@@ -276,6 +304,7 @@
                 <option value="manic|#000000">Manic</option>
             </select>
         </div>
+        <div id="statusMessage" class="status-message"></div>
     </div>
 </div>
 <script src="script.js"></script>
