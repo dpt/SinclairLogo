@@ -150,7 +150,7 @@ Every glyph is drawn using canvas `lineTo` calls that snap to the intersections 
 | `y[2]` | Mid-lower | Junction between lower and upper zones |
 | `y[3]` | Cap height | Top of regular capitals |
 | `y[4]` | Ascender gap | Space between cap height and ascender zone |
-| `y[5]` | Ascender top | Top of tall letters (B, H, L, T) |
+| `y[5]` | Ascender top | Top of tall letters (B, D, H, K, L, T) |
 
 Enabling the **Grid** toggle draws all active x- and y-lines over the canvas, which makes the system immediately visible.
 
